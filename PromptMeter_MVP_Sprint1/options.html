@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8" />
+  <title>PromptMeter — Opções</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="icons/icon32.png" />
+  <style>
+    :root { color-scheme: light dark; }
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:CanvasText;background:Canvas}
+    h1{margin:0 0 12px;font-size:20px}
+    .row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+    .card{border:1px solid color-mix(in oklab, CanvasText 14%, transparent);border-radius:12px;padding:16px;max-width:720px;box-shadow:0 6px 24px rgba(0,0,0,.06);background:color-mix(in oklab, Canvas 98%, CanvasText 2%)}
+    label{font-weight:600;min-width:170px}
+    input[type="text"]{width:380px;padding:8px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);border-radius:10px;background:transparent;color:CanvasText}
+    input[type="number"]{width:100px;padding:8px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);border-radius:10px;background:transparent;color:CanvasText}
+    button{padding:8px 12px;border-radius:10px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);background:transparent;color:CanvasText;cursor:pointer}
+    button:hover{background:color-mix(in oklab, CanvasText 6%, transparent)}
+    .muted{color:color-mix(in oklab, CanvasText 65%, transparent);font-size:13px}
+    .ok{color:#2ea043}
+    .err{color:#cf222e}
+    .pill{display:inline-block;padding:2px 8px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);border-radius:999px;font-size:12px;margin-left:6px}
+  </style>
+</head>
+<body>
+  <h1>PromptMeter <span class="pill" id="version">v?</span></h1>
+  <div class="card">
+    <div class="row">
+      <label for="backendURL">Endpoint do backend (opcional)</label>
+      <input id="backendURL" type="text" placeholder="https://api.exemplo.com (deixe vazio = só local)" />
+      <button id="test" type="button">Testar conexão</button>
+      <span id="testStatus" class="muted"></span>
+    </div>
+    <div class="row">
+      <label for="limit">Limite diário (free)</label>
+      <input id="limit" type="number" min="1" step="1" />
+      <span class="muted">(padrão 30)</span>
+    </div>
+    <div class="row">
+      <label for="language">Idioma</label>
+      <select id="language">
+        <option value="auto">Automático (navegador)</option>
+        <option value="pt-BR">Português (BR)</option>
+        <option value="en">English</option>
+      </select>
+    </div>
+    <div class="row">
+      <label for="premium">Ativar Premium (MVP)</label>
+      <input id="premium" type="checkbox" />
+      <span class="muted">No Sprint 2 isso vira Stripe real.</span>
+    </div>
+    <div class="row">
+      <button id="save" type="button">Salvar</button>
+      <button id="reset" type="button">Zerar uso de hoje</button>
+      <button id="purge" type="button">Limpar tudo</button>
+      <span id="status" class="muted"></span>
+    </div>
+    <p class="muted" id="usage"></p>
+    <hr style="border:0;border-top:1px solid color-mix(in oklab, CanvasText 12%, transparent);margin:16px 0" />
+    <p class="muted">
+      <strong>Privacidade:</strong> a análise local é totalmente offline. O backend (se configurado) recebe apenas
+      os primeiros 4 KB do texto, o host atual e o idioma. Nada é enviado para servidores se o campo Endpoint estiver vazio.
+    </p>
+    <p class="muted">
+      <strong>Atalhos:</strong> Esc esconde o overlay; clique em <em>silenciar</em> para ocultar no site atual.
+    </p>
+  </div>
+  <script src="options.js"></script>
+</body>
+</html>

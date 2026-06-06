@@ -1,0 +1,127 @@
+/* PromptMeter — overlay flutuante */
+
+.pm-wrap {
+  position: fixed;
+  z-index: 2147483000;
+  pointer-events: none;
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 12px;
+  line-height: 1.3;
+  max-width: 520px;
+}
+
+.pm-card {
+  pointer-events: auto;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+  background: color-mix(in oklab, Canvas 92%, CanvasText 8%);
+  color: CanvasText;
+  border: 1px solid color-mix(in oklab, CanvasText 14%, transparent);
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, .14),
+    0 1px 0 color-mix(in oklab, CanvasText 6%, transparent) inset;
+  border-radius: 12px;
+  padding: 8px 10px;
+  min-width: 260px;
+  backdrop-filter: saturate(1.2) blur(6px);
+  -webkit-backdrop-filter: saturate(1.2) blur(6px);
+  transition: opacity .15s ease, transform .15s ease;
+}
+
+.pm-main { min-width: 0; }
+
+.pm-meter {
+  width: 100%;
+  height: 8px;
+  border-radius: 999px;
+  background: color-mix(in oklab, CanvasText 12%, transparent);
+  overflow: hidden;
+}
+
+.pm-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #ff4d4f 0%, #fadb14 55%, #52c41a 100%);
+  transition: width .25s ease;
+}
+
+.pm-note {
+  font-size: 12px;
+  color: color-mix(in oklab, CanvasText 78%, transparent);
+  margin-top: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.pm-score {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in oklab, CanvasText 14%, transparent);
+  background: color-mix(in oklab, Canvas 98%, CanvasText 2%);
+}
+
+.pm-ctr {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pm-chip {
+  font-size: 11px;
+  opacity: .85;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed color-mix(in oklab, CanvasText 22%, transparent);
+}
+
+.pm-muted { opacity: .55; }
+
+.pm-link {
+  cursor: pointer;
+  user-select: none;
+  font-size: 11px;
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  color: inherit;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+
+.pm-link:focus-visible {
+  outline: 2px solid color-mix(in oklab, CanvasText 50%, transparent);
+  outline-offset: 2px;
+}
+
+.pm-hidden { display: none !important; }
+
+/* Compact mode (campos pequenos) */
+.pm-compact .pm-card { min-width: 180px; }
+.pm-compact .pm-note { display: none; }
+
+/* Estados */
+.pm-state-loading .pm-fill { background: linear-gradient(90deg, #888, #ccc, #888); background-size: 200% 100%; animation: pm-shimmer 1.1s linear infinite; }
+.pm-state-limit .pm-card { border-color: #cf222e; }
+.pm-state-limit .pm-score { color: #cf222e; }
+.pm-state-error .pm-card { border-color: #d29922; }
+.pm-state-empty .pm-fill { width: 0% !important; }
+
+@keyframes pm-shimmer {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pm-fill, .pm-card { transition: none !important; }
+  .pm-state-loading .pm-fill { animation: none !important; }
+}

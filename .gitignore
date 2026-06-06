@@ -1,0 +1,22 @@
+# ── Dependencies (caso adicione build/tooling) ──────────
+node_modules/
+.pnp
+.pnp.*
+
+# ── Build / empacotamento da extensão ───────────────────
+dist/
+build/
+*.zip          # PromptMeter_MVP_Sprint1.zip é artefato de build (re-gerável)
+
+# ── Env / segredos (URL de backend etc.) ────────────────
+.env
+.env.*
+!.env.example
+
+# ── Sistema / editor ────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+*.log
+.vscode/
+.idea/

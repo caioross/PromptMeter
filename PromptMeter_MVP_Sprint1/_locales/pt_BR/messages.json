@@ -1,0 +1,10 @@
+{
+  "score_label": { "message": "Nota do prompt" },
+  "quota_title": { "message": "Uso de hoje" },
+  "mute": { "message": "silenciar" },
+  "unmute": { "message": "reativar" },
+  "loading": { "message": "Analisando…" },
+  "limit_reached": { "message": "Limite diário atingido. Volte amanhã ou ative o Premium." },
+  "source_local": { "message": "Análise local (offline)" },
+  "source_backend": { "message": "Análise via backend" }
+}

@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "PromptMeter — Medidor de Prompt",
+  "default_locale": "pt_BR",
+  "version": "0.3.0",
+  "description": "Avalia seu prompt (0–10) e dá uma dica curta (≤142 chars). Funciona em ChatGPT, Claude, Gemini, Perplexity e em qualquer campo de texto longo. Análise local por padrão; backend opcional.",
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "PromptMeter — Opções",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "css": [
+        "overlay.css"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle",
+      "all_frames": true,
+      "match_about_blank": false
+    }
+  ],
+  "options_page": "options.html"
+}

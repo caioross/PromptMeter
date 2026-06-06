@@ -1,0 +1,10 @@
+{
+  "score_label": { "message": "Prompt score" },
+  "quota_title": { "message": "Today's usage" },
+  "mute": { "message": "mute" },
+  "unmute": { "message": "unmute" },
+  "loading": { "message": "Analyzing…" },
+  "limit_reached": { "message": "Daily limit reached. Come back tomorrow or enable Premium." },
+  "source_local": { "message": "Local analysis (offline)" },
+  "source_backend": { "message": "Backend analysis" }
+}
