@@ -1,10 +1,17 @@
 {
-  "score_label": { "message": "Prompt score" },
-  "quota_title": { "message": "Today's usage" },
-  "mute": { "message": "mute" },
-  "unmute": { "message": "unmute" },
-  "loading": { "message": "Analyzing…" },
-  "limit_reached": { "message": "Daily limit reached. Come back tomorrow or enable Premium." },
-  "source_local": { "message": "Local analysis (offline)" },
-  "source_backend": { "message": "Backend analysis" }
+  "change_model": { "message": "Change model" },
+  "hide": { "message": "Hide (Esc)" },
+  "input_cost": { "message": "input cost" },
+  "response_cost": { "message": "Last response cost" },
+  "resp_idle": { "message": "response: —" },
+  "resp": { "message": "response" },
+  "session": { "message": "session" },
+  "session_total": { "message": "Estimated total today" },
+  "pick_model": { "message": "Pick the billed model" },
+  "prices_per_m": { "message": "USD per 1M tokens (input / output)" },
+  "exact": { "message": "exact count" },
+  "approx": { "message": "estimate" },
+  "src_user": { "message": "you" },
+  "src_detected": { "message": "detected" },
+  "src_default": { "message": "default" }
 }

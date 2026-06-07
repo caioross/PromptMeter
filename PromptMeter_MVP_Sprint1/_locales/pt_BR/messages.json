@@ -1,10 +1,17 @@
 {
-  "score_label": { "message": "Nota do prompt" },
-  "quota_title": { "message": "Uso de hoje" },
-  "mute": { "message": "silenciar" },
-  "unmute": { "message": "reativar" },
-  "loading": { "message": "Analisando…" },
-  "limit_reached": { "message": "Limite diário atingido. Volte amanhã ou ative o Premium." },
-  "source_local": { "message": "Análise local (offline)" },
-  "source_backend": { "message": "Análise via backend" }
+  "change_model": { "message": "Trocar modelo" },
+  "hide": { "message": "Esconder (Esc)" },
+  "input_cost": { "message": "custo de entrada" },
+  "response_cost": { "message": "Custo da última resposta" },
+  "resp_idle": { "message": "resposta: —" },
+  "resp": { "message": "resposta" },
+  "session": { "message": "sessão" },
+  "session_total": { "message": "Total estimado hoje" },
+  "pick_model": { "message": "Escolha o modelo cobrado" },
+  "prices_per_m": { "message": "USD por 1M tokens (entrada / saída)" },
+  "exact": { "message": "contagem exata" },
+  "approx": { "message": "estimativa" },
+  "src_user": { "message": "você" },
+  "src_detected": { "message": "detectado" },
+  "src_default": { "message": "padrão" }
 }

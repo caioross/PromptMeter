@@ -1,87 +1,42 @@
-// PromptMeter — Options page logic.
-// Script externo é obrigatório no MV3 (CSP padrão proíbe inline).
+// PromptMeter — Options page logic (MV3, sem inline).
 
-(() => {
-  "use strict";
+const DEFAULTS = { currency: "both", brlRate: 5.40, trackResponses: true, modelOverrides: {} };
+const $ = (id) => document.getElementById(id);
 
-  const $ = (id) => document.getElementById(id);
+async function load() {
+  const s = await chrome.storage.sync.get(Object.keys(DEFAULTS));
+  $("currency").value = s.currency || DEFAULTS.currency;
+  $("brlRate").value = Number.isFinite(s.brlRate) ? s.brlRate : DEFAULTS.brlRate;
+  $("trackResponses").checked = typeof s.trackResponses === "boolean" ? s.trackResponses : DEFAULTS.trackResponses;
+  try { $("version").textContent = "v" + chrome.runtime.getManifest().version; } catch {}
+  try { if (window.PM_PRICING) $("priceDate").textContent = window.PM_PRICING.UPDATED; } catch {}
+}
 
-  function todayKey() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  }
+async function save() {
+  const patch = {
+    currency: $("currency").value,
+    brlRate: Math.max(0, Number($("brlRate").value) || DEFAULTS.brlRate),
+    trackResponses: $("trackResponses").checked
+  };
+  await chrome.storage.sync.set(patch);
+  flash("Salvo ✓");
+}
 
-  function setStatus(el, text, ok) {
-    el.textContent = text || "";
-    el.classList.remove("ok", "err");
-    if (typeof ok === "boolean") el.classList.add(ok ? "ok" : "err");
-  }
+function flash(msg) {
+  const st = $("status");
+  st.textContent = msg;
+  st.className = "ok";
+  setTimeout(() => { st.textContent = ""; st.className = "muted"; }, 1800);
+}
 
-  async function load() {
-    const manifest = chrome.runtime.getManifest();
-    $("version").textContent = "v" + manifest.version;
+$("save").addEventListener("click", save);
+$("resetSession").addEventListener("click", async () => {
+  await chrome.storage.local.remove("pmSession");
+  flash("Sessão zerada ✓");
+});
+$("clearOverrides").addEventListener("click", async () => {
+  await chrome.storage.sync.set({ modelOverrides: {} });
+  flash("Preferências de modelo limpas ✓");
+});
 
-    const sync = await chrome.storage.sync.get(["backendURL", "dailyLimit", "premiumEnabled", "language"]);
-    const local = await chrome.storage.local.get(["dailyUsed", "dailyDate"]);
-
-    $("backendURL").value = sync.backendURL || "";
-    $("limit").value = Number.isFinite(sync.dailyLimit) ? sync.dailyLimit : 30;
-    $("premium").checked = !!sync.premiumEnabled;
-    $("language").value = sync.language || "auto";
-
-    $("usage").textContent =
-      `Uso de hoje (${local.dailyDate || todayKey()}): ${local.dailyUsed || 0} avaliações.`;
-  }
-
-  function validateURL(u) {
-    if (!u) return true; // vazio = só local
-    return /^https?:\/\/[^\s/$.?#].[^\s]*$/i.test(u);
-  }
-
-  async function save() {
-    const backendURL = $("backendURL").value.trim().replace(/\/+$/, "");
-    if (!validateURL(backendURL)) {
-      setStatus($("status"), "URL inválida — use http(s)://… ou deixe vazio.", false);
-      return;
-    }
-    const dailyLimit = Math.max(1, parseInt($("limit").value, 10) || 30);
-    const premiumEnabled = $("premium").checked;
-    const language = $("language").value || "auto";
-    await chrome.storage.sync.set({ backendURL, dailyLimit, premiumEnabled, language });
-    setStatus($("status"), "Preferências salvas.", true);
-  }
-
-  async function resetToday() {
-    await new Promise((resolve) => chrome.runtime.sendMessage({ type: "reset_today" }, () => resolve()));
-    await load();
-    setStatus($("status"), "Uso de hoje zerado.", true);
-  }
-
-  async function purgeAll() {
-    if (!confirm("Limpar TODAS as preferências e histórico local da PromptMeter?")) return;
-    await chrome.storage.sync.clear();
-    await chrome.storage.local.clear();
-    await load();
-    setStatus($("status"), "Tudo limpo. Recarregue as abas para aplicar.", true);
-  }
-
-  async function testBackend() {
-    const url = $("backendURL").value.trim().replace(/\/+$/, "");
-    if (!validateURL(url)) { setStatus($("testStatus"), "URL inválida.", false); return; }
-    if (!url) { setStatus($("testStatus"), "Vazio = modo só local (OK).", true); return; }
-    setStatus($("testStatus"), "Testando…");
-    chrome.runtime.sendMessage({ type: "test_backend", url }, (resp) => {
-      if (!resp) { setStatus($("testStatus"), "Sem resposta do service worker.", false); return; }
-      if (resp.ok) setStatus($("testStatus"), `OK (HTTP ${resp.status}).`, true);
-      else setStatus($("testStatus"), `Falhou: ${resp.error || resp.status || "?"}.`, false);
-    });
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    $("save").addEventListener("click", save);
-    $("reset").addEventListener("click", resetToday);
-    $("purge").addEventListener("click", purgeAll);
-    $("test").addEventListener("click", testBackend);
-    load().catch((e) => setStatus($("status"), "Erro ao carregar: " + e, false));
-  });
-})();
+load();

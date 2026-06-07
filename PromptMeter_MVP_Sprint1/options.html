@@ -6,65 +6,109 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="icons/icon32.png" />
   <style>
-    :root { color-scheme: light dark; }
-    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:24px;color:CanvasText;background:Canvas}
-    h1{margin:0 0 12px;font-size:20px}
-    .row{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-    .card{border:1px solid color-mix(in oklab, CanvasText 14%, transparent);border-radius:12px;padding:16px;max-width:720px;box-shadow:0 6px 24px rgba(0,0,0,.06);background:color-mix(in oklab, Canvas 98%, CanvasText 2%)}
-    label{font-weight:600;min-width:170px}
-    input[type="text"]{width:380px;padding:8px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);border-radius:10px;background:transparent;color:CanvasText}
-    input[type="number"]{width:100px;padding:8px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);border-radius:10px;background:transparent;color:CanvasText}
-    button{padding:8px 12px;border-radius:10px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);background:transparent;color:CanvasText;cursor:pointer}
+    :root { color-scheme: light dark; --line: color-mix(in oklab, CanvasText 12%, transparent); }
+    *{box-sizing:border-box}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;margin:0;color:CanvasText;background:Canvas;line-height:1.5}
+    .wrap{max-width:680px;margin:40px auto;padding:0 20px}
+    h1{margin:0 0 4px;font-size:22px;letter-spacing:-.01em}
+    .sub{color:color-mix(in oklab, CanvasText 60%, transparent);font-size:14px;margin:0 0 24px}
+    .pill{display:inline-block;padding:2px 9px;border:1px solid var(--line);border-radius:999px;font-size:12px;margin-left:8px;vertical-align:middle;color:color-mix(in oklab, CanvasText 60%, transparent)}
+    .card{border:1px solid var(--line);border-radius:16px;padding:8px 20px;margin-bottom:18px;background:color-mix(in oklab, Canvas 97%, CanvasText 3%)}
+    .row{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:15px 0;border-bottom:1px solid var(--line)}
+    .row:last-child{border-bottom:0}
+    .label{font-weight:600}
+    .desc{color:color-mix(in oklab, CanvasText 58%, transparent);font-size:13px;margin-top:2px}
+    .ctrl{flex:none;display:flex;align-items:center;gap:8px}
+    select,input[type="number"]{padding:8px 10px;border:1px solid var(--line);border-radius:10px;background:transparent;color:CanvasText;font-size:14px}
+    input[type="number"]{width:90px}
+    button{padding:9px 14px;border-radius:10px;border:1px solid var(--line);background:transparent;color:CanvasText;cursor:pointer;font-size:14px;font-weight:600}
     button:hover{background:color-mix(in oklab, CanvasText 6%, transparent)}
-    .muted{color:color-mix(in oklab, CanvasText 65%, transparent);font-size:13px}
-    .ok{color:#2ea043}
-    .err{color:#cf222e}
-    .pill{display:inline-block;padding:2px 8px;border:1px solid color-mix(in oklab, CanvasText 18%, transparent);border-radius:999px;font-size:12px;margin-left:6px}
+    button.primary{background:#0f172a;color:#fff;border-color:#0f172a}
+    button.primary:hover{background:#1e293b}
+    .switch{position:relative;width:44px;height:26px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;inset:0;background:color-mix(in oklab, CanvasText 22%, transparent);border-radius:999px;transition:.2s;cursor:pointer}
+    .slider:before{content:"";position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.2s}
+    .switch input:checked + .slider{background:#10a37f}
+    .switch input:checked + .slider:before{transform:translateX(18px)}
+    .muted{color:color-mix(in oklab, CanvasText 58%, transparent);font-size:13px}
+    .ok{color:#10a37f;font-weight:600}
+    .foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:4px}
+    a{color:#2563eb}
   </style>
 </head>
 <body>
-  <h1>PromptMeter <span class="pill" id="version">v?</span></h1>
-  <div class="card">
-    <div class="row">
-      <label for="backendURL">Endpoint do backend (opcional)</label>
-      <input id="backendURL" type="text" placeholder="https://api.exemplo.com (deixe vazio = só local)" />
-      <button id="test" type="button">Testar conexão</button>
-      <span id="testStatus" class="muted"></span>
+  <div class="wrap">
+    <h1>PromptMeter <span class="pill" id="version">v?</span></h1>
+    <p class="sub">Conte tokens e veja o custo de cada prompt em tempo real. 100% local — nenhum dado sai do seu navegador.</p>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="label">Moeda</div>
+          <div class="desc">Mostrar custo em dólar, ou dólar + real (aproximado).</div>
+        </div>
+        <div class="ctrl">
+          <select id="currency">
+            <option value="both">USD + R$ (aprox.)</option>
+            <option value="usd">Apenas USD</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="label">Cotação do dólar (R$)</div>
+          <div class="desc">Usada para a conversão aproximada. Ajuste quando quiser.</div>
+        </div>
+        <div class="ctrl">
+          <input id="brlRate" type="number" min="0" step="0.01" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <div class="label">Custo da resposta + total da sessão</div>
+          <div class="desc">Estima também os tokens da resposta do modelo e soma o gasto do dia.</div>
+        </div>
+        <div class="ctrl">
+          <label class="switch"><input id="trackResponses" type="checkbox" /><span class="slider"></span></label>
+        </div>
+      </div>
     </div>
-    <div class="row">
-      <label for="limit">Limite diário (free)</label>
-      <input id="limit" type="number" min="1" step="1" />
-      <span class="muted">(padrão 30)</span>
+
+    <div class="card">
+      <div class="row">
+        <div>
+          <div class="label">Zerar total da sessão</div>
+          <div class="desc">Reinicia o contador de gasto acumulado de hoje.</div>
+        </div>
+        <div class="ctrl"><button id="resetSession" type="button">Zerar sessão</button></div>
+      </div>
+      <div class="row">
+        <div>
+          <div class="label">Limpar preferências de modelo</div>
+          <div class="desc">Esquece os modelos que você fixou manualmente por site.</div>
+        </div>
+        <div class="ctrl"><button id="clearOverrides" type="button">Limpar</button></div>
+      </div>
     </div>
-    <div class="row">
-      <label for="language">Idioma</label>
-      <select id="language">
-        <option value="auto">Automático (navegador)</option>
-        <option value="pt-BR">Português (BR)</option>
-        <option value="en">English</option>
-      </select>
-    </div>
-    <div class="row">
-      <label for="premium">Ativar Premium (MVP)</label>
-      <input id="premium" type="checkbox" />
-      <span class="muted">No Sprint 2 isso vira Stripe real.</span>
-    </div>
-    <div class="row">
-      <button id="save" type="button">Salvar</button>
-      <button id="reset" type="button">Zerar uso de hoje</button>
-      <button id="purge" type="button">Limpar tudo</button>
+
+    <div class="foot">
+      <button id="save" class="primary" type="button">Salvar</button>
       <span id="status" class="muted"></span>
     </div>
-    <p class="muted" id="usage"></p>
-    <hr style="border:0;border-top:1px solid color-mix(in oklab, CanvasText 12%, transparent);margin:16px 0" />
-    <p class="muted">
-      <strong>Privacidade:</strong> a análise local é totalmente offline. O backend (se configurado) recebe apenas
-      os primeiros 4 KB do texto, o host atual e o idioma. Nada é enviado para servidores se o campo Endpoint estiver vazio.
+
+    <p class="muted" style="margin-top:22px">
+      <strong>Como funciona:</strong> a contagem de tokens dos modelos OpenAI é exata (tokenizer o200k embarcado);
+      para Claude, Gemini e outros a contagem é uma estimativa calibrada (marcada com <b>~</b>). Preços por 1M de tokens,
+      atualizados em <span id="priceDate">—</span>. Você pode trocar o modelo cobrado direto no card que aparece no site.
     </p>
     <p class="muted">
-      <strong>Atalhos:</strong> Esc esconde o overlay; clique em <em>silenciar</em> para ocultar no site atual.
+      <strong>Privacidade:</strong> tudo roda offline no seu navegador. Nenhum texto, token ou custo é enviado para qualquer servidor.
     </p>
   </div>
+  <script src="pricing.js"></script>
   <script src="options.js"></script>
 </body>
 </html>

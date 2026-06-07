@@ -1,14 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "PromptMeter — Medidor de Prompt",
+  "name": "PromptMeter — Medidor de Custo",
   "default_locale": "pt_BR",
-  "version": "0.3.0",
-  "description": "Avalia seu prompt (0–10) e dá uma dica curta (≤142 chars). Funciona em ChatGPT, Claude, Gemini, Perplexity e em qualquer campo de texto longo. Análise local por padrão; backend opcional.",
+  "version": "0.4.0",
+  "description": "Conte tokens e veja o custo de cada prompt (e da resposta) em tempo real. 100% local e determinístico — sem IA. Funciona em ChatGPT, Claude, Gemini e Perplexity.",
   "permissions": [
     "storage"
-  ],
-  "host_permissions": [
-    "<all_urls>"
   ],
   "icons": {
     "16": "icons/icon16.png",
@@ -29,17 +26,24 @@
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "https://chatgpt.com/*",
+        "https://chat.openai.com/*",
+        "https://claude.ai/*",
+        "https://gemini.google.com/*",
+        "https://www.perplexity.ai/*",
+        "https://perplexity.ai/*"
       ],
       "css": [
         "overlay.css"
       ],
       "js": [
+        "tokenizer.js",
+        "pricing.js",
+        "models.js",
         "content.js"
       ],
       "run_at": "document_idle",
-      "all_frames": true,
-      "match_about_blank": false
+      "all_frames": false
     }
   ],
   "options_page": "options.html"
