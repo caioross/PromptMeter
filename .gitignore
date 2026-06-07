@@ -20,3 +20,9 @@ desktop.ini
 *.log
 .vscode/
 .idea/
+
+# Ferramentas internas
+.claude/
+
+# Site de apresentacao = repositorio separado
+/site/
