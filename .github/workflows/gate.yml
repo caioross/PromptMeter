@@ -18,3 +18,5 @@ jobs:
           node-version: 20
       - name: Gate (manifest, sintaxe, 100% local, i18n, pricing/models/tokenizer)
         run: node scripts/gate.mjs
+      - name: Testes de comportamento (node:test — pricing, models, tokenização)
+        run: node --test tests/*.test.mjs
