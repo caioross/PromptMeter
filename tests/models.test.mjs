@@ -1,0 +1,99 @@
+// Testes de comportamento de models.js — detecção de modelo por site e resolução
+// da precedência override > detectado > padrão. Sem DOM real: o texto "lido" do
+// seletor é injetado via stub de document (ver _load.mjs).
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { loadExtension } from './_load.mjs';
+
+const W = loadExtension();
+const M = W.PM_MODELS;
+
+test('PM_MODELS está exposto com a API esperada', () => {
+  assert.ok(M, 'window.PM_MODELS ausente');
+  assert.ok(Array.isArray(M.SITES) && M.SITES.length >= 4, 'esperado >=4 sites');
+  for (const fn of ['siteForHost', 'resolveModel', 'matchModelFromText']) {
+    assert.equal(typeof M[fn], 'function', `PM_MODELS.${fn} não é função`);
+  }
+});
+
+test('matchModelFromText: textos reais dos 4 sites casam com o id correto', () => {
+  // Textos como aparecem no botão de troca de modelo de cada site.
+  const casos = [
+    ['GPT-4o', 'OpenAI', 'gpt-4o'],                       // ChatGPT
+    ['GPT-5.5', 'OpenAI', 'gpt-5.5'],                     // ChatGPT
+    ['Claude Opus 4.8', 'Anthropic', 'claude-opus-4.8'],  // Claude
+    ['Claude Sonnet 4.6', 'Anthropic', 'claude-sonnet-4.6'], // Claude
+    ['Gemini 2.5 Pro', 'Google', 'gemini-2.5-pro'],       // Gemini
+    ['3.5 Flash', 'Google', 'gemini-3.5-flash'],          // Gemini (só número + tier)
+    ['GPT-4.1', 'OpenAI', 'gpt-4.1'],                     // Perplexity (provider OpenAI)
+  ];
+  for (const [text, provider, id] of casos) {
+    assert.equal(M.matchModelFromText(text, provider), id, `"${text}" (${provider})`);
+  }
+});
+
+test('matchModelFromText: qualquer casamento pertence ao provider pedido', () => {
+  // O filtro de provider garante que nunca se casa um modelo de outro provedor.
+  // (O fallback por número é frouxo — ex.: "4" em "Opus 4.8" pode casar GPT-4o —,
+  //  mas o resultado, se houver, fica SEMPRE dentro do provider solicitado.)
+  for (const [text, provider] of [
+    ['Claude Opus 4.8', 'OpenAI'],
+    ['GPT-4o', 'Anthropic'],
+    ['Gemini 2.5 Pro', 'OpenAI'],
+  ]) {
+    const id = M.matchModelFromText(text, provider);
+    if (id !== null) {
+      assert.equal(W.PM_PRICING.getModel(id).provider, provider, `"${text}" casou fora do provider ${provider}`);
+    }
+  }
+});
+
+test('matchModelFromText: texto sem modelo conhecido → null', () => {
+  assert.equal(M.matchModelFromText('algum texto sem nome de modelo', 'OpenAI'), null);
+  assert.equal(M.matchModelFromText('', 'OpenAI'), null);
+});
+
+test('siteForHost: resolve os hosts dos 4 sites suportados', () => {
+  assert.equal(M.siteForHost('chatgpt.com')?.name, 'ChatGPT');
+  assert.equal(M.siteForHost('claude.ai')?.name, 'Claude');
+  assert.equal(M.siteForHost('gemini.google.com')?.name, 'Gemini');
+  assert.equal(M.siteForHost('www.perplexity.ai')?.name, 'Perplexity');
+  assert.equal(M.siteForHost('exemplo-desconhecido.com'), null);
+});
+
+test('resolveModel: override do usuário vence detecção e padrão', () => {
+  // Sandbox com detecção ATIVA ("Claude Sonnet 4.6"), mas override manda outro modelo.
+  const win = loadExtension({ documentText: 'Claude Sonnet 4.6', hostname: 'claude.ai' });
+  const r = win.PM_MODELS.resolveModel('claude.ai', { 'claude.ai': 'claude-opus-4.8' });
+  assert.equal(r.source, 'user');
+  assert.equal(r.modelId, 'claude-opus-4.8');
+});
+
+test('resolveModel: override inválido é ignorado (cai para detectado/padrão)', () => {
+  const win = loadExtension({ documentText: null, hostname: 'claude.ai' });
+  const r = win.PM_MODELS.resolveModel('claude.ai', { 'claude.ai': 'modelo-inexistente' });
+  assert.equal(r.source, 'default');
+  assert.equal(r.modelId, 'claude-sonnet-4.6'); // defaultModel do site Claude
+});
+
+test('resolveModel: detecção pelo DOM vence o padrão do site', () => {
+  const win = loadExtension({ documentText: 'Claude Opus 4.7', hostname: 'claude.ai' });
+  const r = win.PM_MODELS.resolveModel('claude.ai', {});
+  assert.equal(r.source, 'detected');
+  assert.equal(r.modelId, 'claude-opus-4.7');
+});
+
+test('resolveModel: sem override nem detecção → padrão do site', () => {
+  const win = loadExtension({ documentText: null, hostname: 'claude.ai' });
+  const r = win.PM_MODELS.resolveModel('claude.ai', {});
+  assert.equal(r.source, 'default');
+  assert.equal(r.modelId, 'claude-sonnet-4.6');
+});
+
+test('resolveModel: host não suportado → padrão genérico OpenAI, site null', () => {
+  const win = loadExtension({ documentText: null, hostname: 'exemplo.com' });
+  const r = win.PM_MODELS.resolveModel('exemplo.com', {});
+  assert.equal(r.source, 'default');
+  assert.equal(r.modelId, 'gpt-5.5');
+  assert.equal(r.site, null);
+});
