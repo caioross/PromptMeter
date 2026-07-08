@@ -24,5 +24,8 @@ desktop.ini
 # Ferramentas internas
 .claude/
 
+# Documentos internos (não empacotar nem publicar no repo público)
+PromptMeter_MVP_Sprint1/RELATORIO.md
+
 # Site de apresentacao = repositorio separado
 /site/
