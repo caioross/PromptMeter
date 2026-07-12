@@ -148,8 +148,6 @@
   function ensureOverlay() {
     if (wrap) return;
     wrap = el("div", "pm-wrap");
-    wrap.setAttribute("role", "status");
-    wrap.setAttribute("aria-live", "polite");
     card = el("div", "pm-card");
     card.innerHTML = `
       <div class="pm-head">
@@ -164,7 +162,7 @@
         <div class="pm-sep"></div>
         <div class="pm-metric pm-costin"><b class="pm-cost-val">$0</b><span class="pm-metric-label">${escapeHtml(i18n("input_cost", "custo de entrada"))}</span></div>
       </div>
-      <div class="pm-foot">
+      <div class="pm-foot" role="status" aria-live="polite">
         <span class="pm-resp" title="${escapeHtml(i18n("response_cost", "Custo da última resposta"))}">${escapeHtml(i18n("resp_idle", "resposta: —"))}</span>
         <span class="pm-session" title="${escapeHtml(i18n("session_total", "Total estimado hoje"))}">${escapeHtml(i18n("session", "sessão"))}: $0</span>
       </div>`;
