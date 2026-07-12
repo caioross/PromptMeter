@@ -94,19 +94,31 @@ function htmlToText(html) {
 /* ── 4. Extrai valores em dólar numa janela ao redor do rótulo do modelo ── */
 const NUM_RE = /\$\s?(\d+(?:\.\d+)?)/g;
 
-function numbersNear(text, needle, radius = 220) {
+/* Fronteira de token: "gpt-5" NÃO pode casar dentro de "gpt-5.5"/"gpt-5-mini".
+ * O caractere que segue o rótulo não pode continuar o identificador do modelo. */
+function isTokenBoundary(ch) {
+  return ch === undefined || !/[\w.\-]/.test(ch);
+}
+
+/* Para cada ocorrência do rótulo (respeitando fronteira), devolve os números $
+ * da janela SEGUINTE — SEPARADOS por ocorrência. Manter as janelas separadas é o
+ * que permite exigir in E out no MESMO local da página (ver evaluate), sem misturar
+ * preços de modelos vizinhos. */
+function windowsNear(text, needle, radius = 160) {
   const hay = text.toLowerCase();
   const key = needle.toLowerCase();
-  const out = [];
+  const wins = [];
   let from = 0;
   let idx;
   while ((idx = hay.indexOf(key, from)) !== -1) {
-    const window = text.slice(idx, idx + key.length + radius);
-    for (const m of window.matchAll(NUM_RE)) out.push(Number(m[1]));
     from = idx + key.length;
-    if (out.length > 12) break; // não vale a pena varrer a página inteira
+    if (!isTokenBoundary(hay[idx + key.length])) continue; // prefixo de token maior → ignora
+    const window = text.slice(idx, idx + key.length + radius);
+    const nums = [...window.matchAll(NUM_RE)].map((m) => Number(m[1]));
+    if (nums.length) wins.push(nums);
+    if (wins.length >= 8) break; // não vale a pena varrer a página inteira
   }
-  return out;
+  return wins;
 }
 
 /* Termos de busca por modelo: o rótulo e algumas variantes comuns de escrita. */
@@ -124,19 +136,24 @@ function searchTerms(model) {
 function evaluate(model, src) {
   if (!src || !src.url) return { status: 'sem-fonte', found: [] };
   if (!src.text) return { status: 'fonte-falhou', found: [] };
-  const sourceText = src.text;
-  let found = [];
-  for (const term of searchTerms(model)) {
-    const near = numbersNear(sourceText, term);
-    if (near.length) { found = near; break; }
-  }
-  if (!found.length) return { status: 'nao-encontrado', found: [] };
 
-  const near = (a, b) => Math.abs(a - b) < 1e-9;
-  const inOk = found.some((v) => near(v, model.in));
-  const outOk = found.some((v) => near(v, model.out));
-  if (inOk && outOk) return { status: 'confere', found };
-  return { status: 'diverge', found };
+  let wins = [];
+  for (const term of searchTerms(model)) {
+    const w = windowsNear(src.text, term);
+    if (w.length) { wins = w; break; }
+  }
+  if (!wins.length) return { status: 'nao-encontrado', found: [] };
+
+  const eq = (a, b) => Math.abs(a - b) < 1e-9;
+  const flat = [...new Set(wins.flat())]; // só para exibição da pista
+  // 'confere' EXIGE in E out na MESMA janela (mesmo ponto da página). Dois some()
+  // independentes sobre o saco inteiro casariam números de modelos vizinhos e
+  // esconderiam uma divergência real — inadmissível num produto de dinheiro.
+  const paired = wins.some(
+    (nums) => nums.some((v) => eq(v, model.in)) && nums.some((v) => eq(v, model.out))
+  );
+  if (paired) return { status: 'confere', found: flat };
+  return { status: 'diverge', found: flat };
 }
 
 /* ── 6. Orquestra ── */
@@ -188,15 +205,15 @@ async function main() {
 
   /* Saída legível */
   const ICON = {
-    confere: 'OK ',
+    confere: '~= ',
     diverge: '!! ',
     'nao-encontrado': '?  ',
     'fonte-falhou': 'x  ',
     'sem-fonte': '-  ',
   };
   const LEGENDA = {
-    confere: 'in/out da tabela encontrados na fonte',
-    diverge: 'rótulo achado na fonte mas in/out NÃO batem — CONFERIR',
+    confere: 'in E out achados JUNTOS na mesma parte da fonte — pista, não veredito: confira mesmo assim',
+    diverge: 'rótulo achado na fonte mas in/out NÃO batem no mesmo local — CONFERIR',
     'nao-encontrado': 'rótulo não localizado no texto (SPA/JS?) — conferir manual',
     'fonte-falhou': 'fonte configurada mas o download/parse falhou — conferir manual',
     'sem-fonte': 'provedor sem fonte automática (modelo est:true)',
