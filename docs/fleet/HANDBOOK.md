@@ -100,3 +100,14 @@ Overlay CSS/UX, página de opções, docs, testes, a11y, i18n, correções peque
 ## §10 — Verdade de preços
 
 `pricing.js` declara `PRICING_UPDATED`. Toda mudança de preço/modelo: (1) cita a **URL da página oficial** de preços no corpo do PR; (2) atualiza `PRICING_UPDATED`; (3) marca `est: true` em valores não confirmados em fonte oficial; (4) passa por quórum §7.2 com a lente Exatidão conferindo a fonte. Preço desatualizado é bug — usuário toma decisão de dinheiro com esses números.
+
+### Vigilância automática — `scripts/check-prices.mjs`
+
+Ferramenta de **desenvolvimento** (não faz parte da extensão; rede é permitida em `scripts/`). Baixa as páginas oficiais de preços (OpenAI, Anthropic, Google), tenta extrair valores e imprime a tabela de divergências vs. `pricing.js`.
+
+```bash
+node scripts/check-prices.mjs          # tabela legível
+node scripts/check-prices.mjs --json   # saída para máquina
+```
+
+**Rodada de terça do Curador:** rodar este script é o gatilho semanal de conferência de preços. Ele é uma **pista, não um veredito** — as páginas são SPAs pesadas em JS e um `fetch` simples muitas vezes não expõe os números (status `nao-encontrado`/`fonte-falhou`). Qualquer `diverge` (ou suspeita) obriga a conferência **manual** na URL oficial; se o preço mudou, abre-se PR seguindo o rito acima (fonte citada + `PRICING_UPDATED` + quórum). O script **nunca** altera `pricing.js` e sempre sai com código 0 — divergência é sinal para humano, não erro de processo.
