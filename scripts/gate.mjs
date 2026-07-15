@@ -5,7 +5,7 @@
  * Sai com código 0 (verde) ou 1 (vermelho). Ver docs/fleet/HANDBOOK.md §6.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -191,6 +191,42 @@ try {
   }
 } catch (e) {
   fail(`sandbox tokenizer/pricing/models falhou: ${e.message}`);
+}
+
+/* ── 7. Sem artefato NÃO-ENTREGÁVEL na pasta física da extensão (issue #14) ── */
+// As checagens acima só enxergam arquivos RASTREADOS (git ls-files). Porém o ZIP
+// da Store é montado a partir da PASTA FÍSICA PromptMeter_MVP_Sprint1/ — um arquivo
+// interno não-rastreado (ex.: RELATORIO.md, 35 KB de notas de desenvolvimento)
+// seria arrastado para o pacote publicado. Esta checagem lê o diretório real
+// (fs.readdirSync) e barra não-entregáveis conhecidos via denylist de basenames.
+const NONDELIVERABLE = [
+  [/^relatorio(\.|[-_]).*$/i, 'relatório de desenvolvimento interno'],
+  [/^notas?(\.|[-_]).*$/i, 'notas internas'],
+  [/\.(zip|crx|log|bak|tmp|orig|swp)$/i, 'artefato temporário/empacotado'],
+  [/^\.ds_store$/i, 'metadado do sistema (macOS)'],
+  [/^thumbs\.db$/i, 'metadado do sistema (Windows)'],
+];
+{
+  const found = [];
+  const walk = (dir, relBase = '') => {
+    let entries;
+    try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const ent of entries) {
+      const rel = relBase ? `${relBase}/${ent.name}` : ent.name;
+      if (ent.isDirectory()) { walk(path.join(dir, ent.name), rel); continue; }
+      for (const [re, why] of NONDELIVERABLE) {
+        if (re.test(ent.name)) { found.push({ rel, why }); break; }
+      }
+    }
+  };
+  walk(EXT);
+  if (found.length === 0) {
+    ok('pasta física da extensão sem artefatos não-entregáveis');
+  } else {
+    for (const { rel, why } of found) {
+      fail(`ARTEFATO NÃO-ENTREGÁVEL na pasta da extensão: ${rel} — ${why}; remova antes de empacotar (issue #14)`);
+    }
+  }
 }
 
 /* ── Relatório ── */
