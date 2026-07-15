@@ -85,8 +85,11 @@
     {
       match: /(^|\.)perplexity\.ai$/i,
       name: "Perplexity",
-      provider: "OpenAI",          // Perplexity Pro permite escolher; usamos OpenAI como referência
-      defaultModel: "gpt-4.1",
+      // Perplexity Pro deixa o usuário escolher o provedor da resposta (Sonar, GPT,
+      // Claude, Gemini, Grok). provider aberto (null) => matchModelFromText considera
+      // TODOS os providers (models.js:17), evitando precificar Claude/Gemini/Grok como GPT.
+      provider: null,
+      defaultModel: "gpt-4.1",     // padrão quando nada é detectado (Perplexity é OpenAI-backed por padrão)
       detectSelectors: [
         'button[aria-label*="model" i]',
         'button[data-testid*="model" i]'

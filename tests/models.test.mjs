@@ -25,7 +25,7 @@ test('matchModelFromText: textos reais dos 4 sites casam com o id correto', () =
     ['Claude Sonnet 4.6', 'Anthropic', 'claude-sonnet-4.6'], // Claude
     ['Gemini 2.5 Pro', 'Google', 'gemini-2.5-pro'],       // Gemini
     ['3.5 Flash', 'Google', 'gemini-3.5-flash'],          // Gemini (só número + tier)
-    ['GPT-4.1', 'OpenAI', 'gpt-4.1'],                     // Perplexity (provider OpenAI)
+    ['GPT-4.1', 'OpenAI', 'gpt-4.1'],                     // GPT no Perplexity (provider explícito OpenAI)
   ];
   for (const [text, provider, id] of casos) {
     assert.equal(M.matchModelFromText(text, provider), id, `"${text}" (${provider})`);
@@ -96,4 +96,61 @@ test('resolveModel: host não suportado → padrão genérico OpenAI, site null'
   assert.equal(r.source, 'default');
   assert.equal(r.modelId, 'gpt-5.5');
   assert.equal(r.site, null);
+});
+
+// ── Perplexity: detecção cross-provider (issue #17) ──
+// No Perplexity Pro o usuário escolhe o provedor da resposta (Sonar, GPT, Claude,
+// Gemini, Grok). O site tem provider ABERTO (null) para não travar em OpenAI e
+// precificar Claude/Gemini/Grok como GPT (fere a "Exatidão honesta", HANDBOOK §10).
+
+test('Perplexity: provider é aberto (detecção considera todos os provedores)', () => {
+  const site = M.siteForHost('perplexity.ai');
+  assert.ok(site, 'site Perplexity deve ser resolvido');
+  assert.ok(!site.provider, 'Perplexity precisa de provider falsy p/ casar modelos de qualquer família');
+});
+
+test('resolveModel Perplexity: "Claude Sonnet 4.6" → claude-sonnet-4.6 (detected)', () => {
+  const win = loadExtension({ documentText: 'Claude Sonnet 4.6', hostname: 'www.perplexity.ai' });
+  const r = win.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r.source, 'detected');
+  assert.equal(r.modelId, 'claude-sonnet-4.6');
+});
+
+test('resolveModel Perplexity: "Gemini 3.1 Pro" → gemini-3.1-pro', () => {
+  const win = loadExtension({ documentText: 'Gemini 3.1 Pro', hostname: 'www.perplexity.ai' });
+  const r = win.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r.source, 'detected');
+  assert.equal(r.modelId, 'gemini-3.1-pro');
+});
+
+test('resolveModel Perplexity: "Grok 4" → grok-4', () => {
+  const win = loadExtension({ documentText: 'Grok 4', hostname: 'www.perplexity.ai' });
+  const r = win.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r.source, 'detected');
+  assert.equal(r.modelId, 'grok-4');
+});
+
+test('resolveModel Perplexity: "GPT-4.1" continua gpt-4.1', () => {
+  const win = loadExtension({ documentText: 'GPT-4.1', hostname: 'www.perplexity.ai' });
+  const r = win.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r.source, 'detected');
+  assert.equal(r.modelId, 'gpt-4.1');
+});
+
+test('resolveModel Perplexity: texto sem modelo conhecido → fallback ao defaultModel', () => {
+  const win = loadExtension({ documentText: 'Sonar Large', hostname: 'www.perplexity.ai' });
+  const r = win.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r.source, 'default');
+  assert.equal(r.modelId, 'gpt-4.1'); // defaultModel do Perplexity
+});
+
+test('resolveModel ChatGPT: filtro OpenAI intacto — texto Claude nunca resolve fora do provider', () => {
+  // Regressão do provider fixo: mudar só o Perplexity não pode fazer um site de provider
+  // fixo (ChatGPT) casar modelo de outra família. O que ele resolver é SEMPRE OpenAI.
+  // (O fallback por número em models.js é frouxo e pode "detectar" um GPT genérico aqui —
+  //  o essencial é que jamais vire claude-sonnet-4.6.)
+  const win = loadExtension({ documentText: 'Claude Sonnet 4.6', hostname: 'chatgpt.com' });
+  const r = win.PM_MODELS.resolveModel('chatgpt.com', {});
+  assert.equal(win.PM_PRICING.getModel(r.modelId).provider, 'OpenAI');
+  assert.notEqual(r.modelId, 'claude-sonnet-4.6');
 });
