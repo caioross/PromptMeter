@@ -1,6 +1,6 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
-// Preços em USD por 1.000.000 de tokens (input/output). Atualizado em 2026-06-06,
+// Preços em USD por 1.000.000 de tokens (input/output). Atualizado em 2026-07-15,
 // a partir das páginas oficiais de preços (OpenAI, Anthropic, Google).
 //
 // family controla a contagem de tokens:
@@ -11,7 +11,7 @@
 (() => {
   "use strict";
 
-  const PRICING_UPDATED = "2026-06-06";
+  const PRICING_UPDATED = "2026-07-15";
 
   // tokFactor: multiplica a contagem o200k para aproximar a tokenização da família.
   const FAMILY = {
@@ -26,6 +26,11 @@
   // in/out = USD por 1M tokens. est:true marca preço aproximado (não confirmado em fonte oficial).
   const MODELS = [
     // ---------- OpenAI (ChatGPT) ----------
+    // Família GPT-5.6 (GA 2026-07-09) — flagship atual. Sol declarado primeiro: é o
+    // fallback da família quando o seletor exibe só "GPT-5.6" (ver models.js §fallback).
+    { id: "gpt-5.6-sol",    label: "GPT-5.6 Sol",    provider: "OpenAI", family: "openai", in: 5.00,  out: 30.00 },
+    { id: "gpt-5.6-terra",  label: "GPT-5.6 Terra",  provider: "OpenAI", family: "openai", in: 2.50,  out: 15.00 },
+    { id: "gpt-5.6-luna",   label: "GPT-5.6 Luna",   provider: "OpenAI", family: "openai", in: 1.00,  out: 6.00 },
     { id: "gpt-5.5",        label: "GPT-5.5",        provider: "OpenAI", family: "openai", in: 5.00,  out: 30.00 },
     { id: "gpt-5.4",        label: "GPT-5.4",        provider: "OpenAI", family: "openai", in: 2.50,  out: 15.00 },
     { id: "gpt-5.4-mini",   label: "GPT-5.4 mini",   provider: "OpenAI", family: "openai", in: 0.75,  out: 4.50 },
