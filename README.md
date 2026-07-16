@@ -19,7 +19,7 @@ Uma extensão Chrome que conta os **tokens** e calcula o **custo** do seu prompt
 
 <br/>
 
-**[🌐 Site](https://promptmeter-pi.vercel.app)** &nbsp;·&nbsp; **[🧮 Testar o cálculo](https://promptmeter-pi.vercel.app/#demo)** &nbsp;·&nbsp; **[⬇️ Baixar a extensão](PromptMeter_MVP_Sprint1.zip)**
+**[🌐 Site](https://promptmeter-pi.vercel.app)** &nbsp;·&nbsp; **[🧮 Testar o cálculo](https://promptmeter-pi.vercel.app/#demo)** &nbsp;·&nbsp; **[⬇️ Baixar a extensão](https://github.com/caioross/PromptMeter/releases)**
 
 </div>
 
@@ -122,7 +122,9 @@ A tabela em [`pricing.js`](PromptMeter_MVP_Sprint1/pricing.js) traz os preços o
 
 > A extensão ainda **não está na Chrome Web Store** — a instalação é manual (leva ~30 segundos).
 
-1. **Baixe e descompacte** [`PromptMeter_MVP_Sprint1.zip`](PromptMeter_MVP_Sprint1.zip) (ou use a pasta `PromptMeter_MVP_Sprint1/` deste repositório).
+> Builds oficiais (ZIP) são publicados em [Releases](https://github.com/caioross/PromptMeter/releases); o empacotamento segue o processo da skill interna `pmeter-extension-quality`.
+
+1. **Baixe e descompacte** o ZIP mais recente em [Releases](https://github.com/caioross/PromptMeter/releases) (ou use a pasta `PromptMeter_MVP_Sprint1/` deste repositório).
 2. Abra **`chrome://extensions/`** (funciona em Chrome, Edge e Brave).
 3. Ative o **"Modo do desenvolvedor"** (canto superior direito).
 4. Clique em **"Carregar sem compactação"** e selecione a pasta **`PromptMeter_MVP_Sprint1/`**.
