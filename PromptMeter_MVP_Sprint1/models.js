@@ -30,10 +30,13 @@
     // 2) fallback por número de versão isolado (ex.: "4.8", "5.5", "3.5 flash").
     //    Ordem de DECLARAÇÃO (flagship primeiro): um rótulo genérico como "GPT-5.6"
     //    resolve para o flagship da família (gpt-5.6-sol), não para uma variante barata.
+    //    O conjunto de tiers do texto deve ser IGUAL ao do rótulo: "2.5 flash lite"
+    //    não casa em "Gemini 2.5 Flash" ({flash} vs {flash,lite}) nem o inverso.
+    const tiersOf = (s) => (s.match(/\b(opus|sonnet|haiku|pro|flash|mini|nano|lite)\b/g) || []).sort().join(" ");
+    const nTiers = tiersOf(n);
     for (const m of inProvider) {
       const ver = (m.label.match(/[0-9]+(\.[0-9]+)?/g) || []).join(" ");
-      const tier = (norm(m.label).match(/\b(opus|sonnet|haiku|pro|flash|mini|nano|lite)\b/g) || []).join(" ");
-      if (ver && n.includes(norm(ver)) && (!tier || n.includes(tier.split(" ")[0]))) return m.id;
+      if (ver && n.includes(norm(ver)) && tiersOf(norm(m.label)) === nTiers) return m.id;
     }
     return null;
   }
