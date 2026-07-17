@@ -151,7 +151,7 @@
     card = el("div", "pm-card");
     card.innerHTML = `
       <div class="pm-head">
-        <button type="button" class="pm-model" title="${escapeHtml(i18n("change_model", "Trocar modelo"))}">
+        <button type="button" class="pm-model" aria-haspopup="menu" aria-expanded="false" title="${escapeHtml(i18n("change_model", "Trocar modelo"))}">
           <span class="pm-dot"></span><span class="pm-model-name">—</span><span class="pm-caret">▾</span>
         </button>
         <span class="pm-src"></span>
@@ -168,13 +168,19 @@
       </div>`;
     wrap.appendChild(card);
     menu = el("div", "pm-menu pm-hidden");
+    menu.setAttribute("role", "menu");
     wrap.appendChild(menu);
     document.documentElement.appendChild(wrap);
 
     card.querySelector(".pm-model").addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); }, true);
     card.querySelector(".pm-x").addEventListener("click", (e) => { e.stopPropagation(); hideOverlay(); }, true);
-    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && wrap && !wrap.classList.contains("pm-hidden")) hideOverlay(); });
-    document.addEventListener("click", () => { if (menu && !menu.classList.contains("pm-hidden")) menu.classList.add("pm-hidden"); }, true);
+    document.addEventListener("keydown", (e) => {
+      if (e.key !== "Escape") return;
+      // Esc fecha primeiro o menu de modelo (se aberto); só depois dispensa o card.
+      if (menu && !menu.classList.contains("pm-hidden")) { closeMenu(); return; }
+      if (wrap && !wrap.classList.contains("pm-hidden")) hideOverlay();
+    });
+    document.addEventListener("click", () => { closeMenu(); }, true);
   }
 
   function hideOverlay() { if (wrap) wrap.classList.add("pm-hidden"); }
@@ -190,7 +196,7 @@
       for (const m of groups[prov]) {
         const sel = m.id === currentModelId ? " pm-sel" : "";
         const est = m.est ? ' <span class="pm-est">~</span>' : "";
-        html += `<button type="button" class="pm-mitem${sel}" data-id="${m.id}">
+        html += `<button type="button" role="menuitem" class="pm-mitem${sel}" data-id="${m.id}">
           <span class="pm-mname">${escapeHtml(m.label)}${est}</span>
           <span class="pm-mprice">$${m.in} / $${m.out}</span></button>`;
       }
@@ -207,15 +213,33 @@
         settings.modelOverrides = overrides;
         await chrome.storage.sync.set({ modelOverrides: overrides });
         currentModelId = id; modelSource = "user";
-        menu.classList.add("pm-hidden");
+        closeMenu();
         if (activeTarget) evaluate(activeTarget, true);
       }, true);
     });
   }
+  // Abrir/fechar do menu centralizados para manter aria-expanded sincronizado.
+  function setMenuExpanded(open) {
+    const btn = card && card.querySelector(".pm-model");
+    if (btn) btn.setAttribute("aria-expanded", open ? "true" : "false");
+  }
+  function openMenu() {
+    if (!menu) return;
+    buildMenu();
+    menu.classList.remove("pm-hidden");
+    setMenuExpanded(true);
+    position();
+  }
+  function closeMenu() {
+    if (menu && !menu.classList.contains("pm-hidden")) {
+      menu.classList.add("pm-hidden");
+      setMenuExpanded(false);
+    }
+  }
   function toggleMenu() {
     if (!menu) return;
-    if (menu.classList.contains("pm-hidden")) { buildMenu(); menu.classList.remove("pm-hidden"); position(); }
-    else menu.classList.add("pm-hidden");
+    if (menu.classList.contains("pm-hidden")) openMenu();
+    else closeMenu();
   }
 
   function position() {
