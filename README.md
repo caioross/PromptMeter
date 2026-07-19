@@ -143,6 +143,8 @@ Sem backend, sem IA, sem conta. **Tokenização e preço acontecem no seu navega
 
 A única permissão pedida é `storage` (para salvar suas preferências localmente).
 
+📄 Política de privacidade completa (PT/EN): [`docs/store/PRIVACY.md`](docs/store/PRIVACY.md).
+
 ## 🗂️ Estrutura do projeto
 
 ```
