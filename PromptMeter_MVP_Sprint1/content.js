@@ -10,6 +10,7 @@
   const PAUSE_MS = 350;          // debounce de digitação
   const MAX_TEXT = 200000;       // teto de caracteres analisados
   const STREAM_IDLE_MS = 1400;   // resposta considerada "pronta" após este tempo sem mudar
+  const HISTORY_MAX_DAYS = 90;   // teto de datas mantidas em pmHistory (poda das mais antigas)
   const DEBUG = (() => { try { return localStorage.getItem("PM_DEBUG") === "1"; } catch { return false; } })();
   const log = (...a) => { if (DEBUG) try { console.log("[PromptMeter]", ...a); } catch {} };
 
@@ -57,9 +58,36 @@
     const d = new Date();
     return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   };
+  // Consolida uma sessão encerrada no histórico persistente e poda para no máximo N datas.
+  // Função PURA: não lê nem grava storage; devolve um NOVO objeto de histórico (base para as
+  // próximas fatias do epic #30). Só consolida sessão não-vazia (msgs > 0) com data.
+  function rollSessionIntoHistory(prevSession, history, N) {
+    const hist = { ...(history || {}) };
+    if (prevSession && prevSession.date && (Number(prevSession.msgs) || 0) > 0) {
+      hist[prevSession.date] = {
+        inUSD: Number(prevSession.inUSD) || 0,
+        outUSD: Number(prevSession.outUSD) || 0,
+        msgs: Number(prevSession.msgs) || 0
+      };
+    }
+    // Poda: mantém no máximo N datas. YYYY-MM-DD ordena lexicograficamente = cronologicamente,
+    // então as primeiras da lista ordenada são as mais antigas a descartar.
+    const cap = (Number.isInteger(N) && N > 0) ? N : HISTORY_MAX_DAYS;
+    const dates = Object.keys(hist).sort();
+    if (dates.length > cap) {
+      for (const d of dates.slice(0, dates.length - cap)) delete hist[d];
+    }
+    return hist;
+  }
+
   async function getSession() {
-    const { pmSession } = await chrome.storage.local.get(["pmSession"]);
+    const { pmSession, pmHistory } = await chrome.storage.local.get(["pmSession", "pmHistory"]);
     if (!pmSession || pmSession.date !== todayKey()) {
+      // Virou o dia: antes de descartar a sessão anterior, consolide-a no histórico (se não-vazia).
+      if (pmSession && pmSession.date && pmSession.date !== todayKey() && (Number(pmSession.msgs) || 0) > 0) {
+        const newHistory = rollSessionIntoHistory(pmSession, pmHistory || {}, HISTORY_MAX_DAYS);
+        await chrome.storage.local.set({ pmHistory: newHistory });
+      }
       return { date: todayKey(), inUSD: 0, outUSD: 0, msgs: 0 };
     }
     return pmSession;
@@ -394,18 +422,7 @@
   }
   function onScrollResize() { position(); }
 
-  chrome.storage.onChanged.addListener((changes, area) => {
-    if (area === "sync" && (changes.currency || changes.brlRate || changes.trackResponses || changes.modelOverrides)) {
-      loadSettings().then(() => { if (activeTarget) evaluate(activeTarget, true); });
-    }
-    if (area === "local" && changes.mutedSites) {
-      const muted = (changes.mutedSites.newValue || {})[location.hostname];
-      if (muted) hideOverlay(); else if (activeTarget) { wrap && wrap.classList.remove("pm-hidden"); position(); }
-    }
-  });
-
-  // ---------- Boot ----------
-  (async function boot() {
+  async function boot() {
     await loadSettings();
     resolveModel();
     document.addEventListener("focusin", onFocusIn, true);
@@ -415,5 +432,28 @@
     if (window.visualViewport) window.visualViewport.addEventListener("resize", onScrollResize, true);
     startResponseObserver();
     log("cost meter ready");
-  })();
+  }
+
+  // ---------- Runtime (só no browser) ----------
+  // Guardas inertes na extensão: existem apenas para tornar este arquivo carregável em Node
+  // (test runner), onde `chrome`/`document` não existem. Nenhuma mudança de comportamento no site.
+  if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+      if (area === "sync" && (changes.currency || changes.brlRate || changes.trackResponses || changes.modelOverrides)) {
+        loadSettings().then(() => { if (activeTarget) evaluate(activeTarget, true); });
+      }
+      if (area === "local" && changes.mutedSites) {
+        const muted = (changes.mutedSites.newValue || {})[location.hostname];
+        if (muted) hideOverlay(); else if (activeTarget) { wrap && wrap.classList.remove("pm-hidden"); position(); }
+      }
+    });
+  }
+
+  // ---------- Boot ----------
+  if (typeof document !== "undefined") boot();
+
+  // Export só em Node (CommonJS) para o teste da função pura; no browser `module` é undefined.
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = { rollSessionIntoHistory };
+  }
 })();
