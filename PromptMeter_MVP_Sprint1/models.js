@@ -100,7 +100,10 @@
       // Claude, Gemini, Grok). provider aberto (null) => matchModelFromText considera
       // TODOS os providers (models.js:17), evitando precificar Claude/Gemini/Grok como GPT.
       provider: null,
-      defaultModel: "gpt-4.1",     // padrão quando nada é detectado (Perplexity é OpenAI-backed por padrão)
+      // Free/Best (o caso mais comum) é servido pela família Sonar e a Perplexity NÃO
+      // expõe o modelo na UI Free → sem texto para detectar. O padrão precisa ser `sonar`,
+      // não um modelo OpenAI: precificar como GPT-4.1 fabrica o custo (issue #34, HANDBOOK §10).
+      defaultModel: "sonar",
       detectSelectors: [
         'button[aria-label*="model" i]',
         'button[data-testid*="model" i]'

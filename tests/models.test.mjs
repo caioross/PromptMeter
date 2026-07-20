@@ -137,11 +137,29 @@ test('resolveModel Perplexity: "GPT-4.1" continua gpt-4.1', () => {
   assert.equal(r.modelId, 'gpt-4.1');
 });
 
-test('resolveModel Perplexity: texto sem modelo conhecido → fallback ao defaultModel', () => {
-  const win = loadExtension({ documentText: 'Sonar Large', hostname: 'www.perplexity.ai' });
+// #34: o caso mais comum (Free/Best) NÃO expõe o modelo na UI → readSelectorText volta
+// vazio (aqui, documentText null). O padrão precisa ser Sonar (o que a Perplexity de fato
+// serve), nunca GPT-4.1 — senão o overlay fabrica o preço de um modelo OpenAI que não
+// respondeu (fere a "Exatidão honesta", HANDBOOK §10).
+test('resolveModel Perplexity: sem detecção → padrão Sonar (não gpt-4.1)', () => {
+  const win = loadExtension({ documentText: null, hostname: 'www.perplexity.ai' });
   const r = win.PM_MODELS.resolveModel('www.perplexity.ai', {});
   assert.equal(r.source, 'default');
-  assert.equal(r.modelId, 'gpt-4.1'); // defaultModel do Perplexity
+  assert.equal(r.modelId, 'sonar');
+  assert.notEqual(r.modelId, 'gpt-4.1');
+});
+
+// Perplexity Pro, quando expõe a variante Sonar escolhida, deve casá-la (não cair no default).
+test('resolveModel Perplexity: "Sonar" → sonar · "Sonar Pro" → sonar-pro (detected)', () => {
+  const w1 = loadExtension({ documentText: 'Sonar', hostname: 'www.perplexity.ai' });
+  const r1 = w1.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r1.source, 'detected');
+  assert.equal(r1.modelId, 'sonar');
+
+  const w2 = loadExtension({ documentText: 'Sonar Pro', hostname: 'www.perplexity.ai' });
+  const r2 = w2.PM_MODELS.resolveModel('www.perplexity.ai', {});
+  assert.equal(r2.source, 'detected');
+  assert.equal(r2.modelId, 'sonar-pro');
 });
 
 test('resolveModel ChatGPT: filtro OpenAI intacto — texto Claude nunca resolve fora do provider', () => {

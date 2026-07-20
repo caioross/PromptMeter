@@ -1,7 +1,7 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
-// Preços em USD por 1.000.000 de tokens (input/output). Atualizado em 2026-07-15,
-// a partir das páginas oficiais de preços (OpenAI, Anthropic, Google).
+// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-20,
+// a partir das páginas oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
 //
 // family controla a contagem de tokens:
 //   "openai"  -> contagem EXATA (tokenizer o200k_base embarcado)
@@ -11,16 +11,19 @@
 (() => {
   "use strict";
 
-  const PRICING_UPDATED = "2026-07-15";
+  const PRICING_UPDATED = "2026-07-20";
 
   // tokFactor: multiplica a contagem o200k para aproximar a tokenização da família.
   const FAMILY = {
     openai:    { exact: true,  tokFactor: 1.00 },
     anthropic: { exact: false, tokFactor: 1.15 }, // Opus 4.7+ usa tokenizer novo (mais tokens)
     google:    { exact: false, tokFactor: 1.05 },
-    xai:       { exact: false, tokFactor: 1.10 },
-    deepseek:  { exact: false, tokFactor: 1.10 },
-    generic:   { exact: false, tokFactor: 1.10 }
+    xai:        { exact: false, tokFactor: 1.10 },
+    deepseek:   { exact: false, tokFactor: 1.10 },
+    // Sonar é Llama-based (tokenizer BPE ~128k): produz ~10% mais tokens que o200k
+    // no texto típico PT/EN. Sem tokenizer próprio embarcado → estimativa (est nos preços).
+    perplexity: { exact: false, tokFactor: 1.10 },
+    generic:    { exact: false, tokFactor: 1.10 }
   };
 
   // in/out = USD por 1M tokens. est:true marca preço aproximado (não confirmado em fonte oficial).
@@ -59,6 +62,16 @@
     { id: "gemini-2.5-pro",        label: "Gemini 2.5 Pro",        provider: "Google", family: "google", in: 1.25, out: 10.00 },
     { id: "gemini-2.5-flash",      label: "Gemini 2.5 Flash",      provider: "Google", family: "google", in: 0.30, out: 2.50 },
     { id: "gemini-2.5-flash-lite", label: "Gemini 2.5 Flash-Lite", provider: "Google", family: "google", in: 0.10, out: 0.40 },
+
+    // ---------- Perplexity (Sonar) ----------
+    // Preços/token conferidos em docs.perplexity.ai/getting-started/pricing (2026-07-20).
+    // est:true de propósito: (1) a contagem é estimativa (tokenizer Llama aproximado por
+    // o200k×tokFactor) e (2) o Sonar cobra taxas de busca POR REQUISIÇÃO ($5–14/1k reqs,
+    // conforme o tamanho do contexto) que o PromptMeter não consegue medir — logo o custo
+    // por token exibido é um PISO honesto, não o total. O padrão Free/Best é `sonar`.
+    { id: "sonar",               label: "Sonar",               provider: "Perplexity", family: "perplexity", in: 1.00, out: 1.00,  est: true },
+    { id: "sonar-pro",           label: "Sonar Pro",           provider: "Perplexity", family: "perplexity", in: 3.00, out: 15.00, est: true },
+    { id: "sonar-reasoning-pro", label: "Sonar Reasoning Pro", provider: "Perplexity", family: "perplexity", in: 2.00, out: 8.00,  est: true },
 
     // ---------- Outros (aproximados — confira na fonte) ----------
     { id: "grok-4",        label: "Grok 4",         provider: "xAI",      family: "xai",      in: 3.00, out: 15.00, est: true },
