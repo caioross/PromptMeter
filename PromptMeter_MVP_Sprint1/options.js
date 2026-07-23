@@ -34,6 +34,12 @@ $("resetSession").addEventListener("click", async () => {
   await chrome.storage.local.remove("pmSession");
   flash("Sessão zerada ✓");
 });
+$("clearHistory").addEventListener("click", async () => {
+  // Ação destrutiva (apaga até 90 dias): exige confirmação explícita.
+  if (!confirm("Apagar todo o histórico de gastos guardado neste navegador? Esta ação não pode ser desfeita.")) return;
+  await chrome.storage.local.remove("pmHistory");
+  flash("Histórico apagado ✓");
+});
 $("clearOverrides").addEventListener("click", async () => {
   await chrome.storage.sync.set({ modelOverrides: {} });
   flash("Preferências de modelo limpas ✓");
