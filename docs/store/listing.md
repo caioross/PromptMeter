@@ -67,9 +67,9 @@ Nenhuma IA é chamada para "estimar" nada. Mesmo texto, mesmo modelo, mesmo resu
 
 PRECISÃO: O QUE É EXATO E O QUE É ESTIMATIVA
 Seja bem-vindo à parte honesta. A extensão embarca o tokenizer o200k_base:
-• Modelos OpenAI (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, GPT-5.6, o3): contagem EXATA.
-• Anthropic (Claude), Google (Gemini), Perplexity (Sonar), xAI (Grok) e DeepSeek: ESTIMATIVA calibrada — a contagem o200k_base é ajustada por um fator por família, porque esses provedores usam tokenizadores próprios. O número é próximo, não exato, e a interface sempre marca isso com "~".
-Os preços vêm de uma tabela local com 32 modelos, conferida nas páginas oficiais de preços de cada provedor; a data da última conferência fica no próprio código. Preços mudam — trate o valor como uma referência muito boa, não como sua fatura.
+• Modelos OpenAI (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, o3): contagem EXATA.
+• Anthropic (Claude), Google (Gemini), xAI (Grok) e DeepSeek: ESTIMATIVA calibrada — a contagem o200k_base é ajustada por um fator por família, porque esses provedores usam tokenizadores próprios. O número é próximo, não exato, e a interface sempre marca isso com "~".
+Os preços vêm de uma tabela local com 26 modelos, conferida nas páginas oficiais de preços de cada provedor; a data da última conferência fica no próprio código. Preços mudam — trate o valor como uma referência muito boa, não como sua fatura.
 
 PERMISSÃO
 Uma só: "storage", para salvar as suas preferências (moeda, cotação do R$, modelo escolhido por site, total do dia) no seu próprio navegador. Nada é enviado para lugar nenhum.
@@ -128,9 +128,9 @@ No AI is ever called to "estimate" anything. Same text, same model, same result 
 
 ACCURACY: WHAT IS EXACT AND WHAT IS AN ESTIMATE
 Here is the honest part. The extension embeds the o200k_base tokenizer:
-• OpenAI models (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, GPT-5.6, o3): EXACT count.
-• Anthropic (Claude), Google (Gemini), Perplexity (Sonar), xAI (Grok) and DeepSeek: calibrated ESTIMATE — the o200k_base count is adjusted by a per-family factor, because those providers use their own tokenizers. The number is close, not exact, and the UI always flags it with "~".
-Prices come from a local table of 32 models, checked against each provider's official pricing page; the date of the last check lives in the code itself. Prices change — treat the figure as a very good reference, not as your invoice.
+• OpenAI models (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, o3): EXACT count.
+• Anthropic (Claude), Google (Gemini), xAI (Grok) and DeepSeek: calibrated ESTIMATE — the o200k_base count is adjusted by a per-family factor, because those providers use their own tokenizers. The number is close, not exact, and the UI always flags it with "~".
+Prices come from a local table of 26 models, checked against each provider's official pricing page; the date of the last check lives in the code itself. Prices change — treat the figure as a very good reference, not as your invoice.
 
 PERMISSION
 Exactly one: "storage", to keep your preferences (currency, BRL rate, per-site model choice, daily total) inside your own browser. Nothing is ever sent anywhere.
@@ -188,7 +188,7 @@ Base: [`docs/store/PRIVACY.md`](PRIVACY.md).
 
 - [ ] Nome idêntico a `manifest.json → name` (`PromptMeter — Medidor de Custo`).
 - [ ] Descrição curta ≤132 caracteres — recontar após qualquer edição.
-- [ ] Número de modelos (32) e famílias conferem com `pricing.js`.
+- [ ] Número de modelos (26) e famílias conferem com `pricing.js`.
 - [ ] Sites listados = os 4 do `manifest.json → content_scripts.matches`.
 - [ ] A distinção exato (OpenAI) × estimativa (demais) está explícita nas duas línguas.
 - [ ] `docs/store/PRIVACY.md` publicado na URL declarada.
