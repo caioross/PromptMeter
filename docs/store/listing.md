@@ -146,6 +146,8 @@ FREE, NO SIGN-UP, NO QUOTA. Open source: github.com/caioross/PromptMeter
 |---|---|
 | **Category** | `Productivity` |
 | **Language** (idioma padrão) | Português (Brasil) — `pt-BR`; listing adicional em `en` |
+| **Screenshots** | **Obrigatório: 1 a 5 imagens de 1280×800** — sem ao menos uma, o envio não é aceito. Roteiro de captura: [`screenshots.md`](screenshots.md) |
+| **Store icon** (128×128) | `PromptMeter_MVP_Sprint1/icons/icon128.png` (o mesmo do `manifest.json → icons`) |
 | **Website / Homepage URL** | https://promptmeter-pi.vercel.app |
 | **Support URL** | https://github.com/caioross/PromptMeter/issues |
 | **Privacy policy URL** | https://github.com/caioross/PromptMeter/blob/main/docs/store/PRIVACY.md |
@@ -191,4 +193,7 @@ Base: [`docs/store/PRIVACY.md`](PRIVACY.md).
 - [ ] Número de modelos (26) e famílias conferem com `pricing.js`.
 - [ ] Sites listados = os 4 do `manifest.json → content_scripts.matches`.
 - [ ] A distinção exato (OpenAI) × estimativa (demais) está explícita nas duas línguas.
+- [ ] **Screenshots capturados conforme [`screenshots.md`](screenshots.md)** — ao menos 1 (idealmente 5)
+      em 1280×800, uma delas evidenciando o marcador `~` de estimativa, e **nenhum dado pessoal
+      visível** (nome, e-mail, avatar, título de conversa). Sem imagem o formulário não é submetido.
 - [ ] `docs/store/PRIVACY.md` publicado na URL declarada.
