@@ -33,6 +33,7 @@
   let pendingPrompt = null;      // { tokens, at } capturado ao enviar
   const processedResponses = new WeakSet();
   const respLen = new WeakMap(); // node -> último comprimento conhecido (para detectar fim do stream)
+  let userHidden = false;        // usuário dispensou o card (✕/Esc); só refoco do campo reabre
 
   // ---------- Settings ----------
   const DEFAULTS = {
@@ -201,17 +202,23 @@
     document.documentElement.appendChild(wrap);
 
     card.querySelector(".pm-model").addEventListener("click", (e) => { e.stopPropagation(); toggleMenu(); }, true);
-    card.querySelector(".pm-x").addEventListener("click", (e) => { e.stopPropagation(); hideOverlay(); }, true);
+    card.querySelector(".pm-x").addEventListener("click", (e) => { e.stopPropagation(); dismissOverlay(); }, true);
     document.addEventListener("keydown", (e) => {
       if (e.key !== "Escape") return;
       // Esc fecha primeiro o menu de modelo (se aberto); só depois dispensa o card.
       if (menu && !menu.classList.contains("pm-hidden")) { closeMenu(); return; }
-      if (wrap && !wrap.classList.contains("pm-hidden")) hideOverlay();
+      if (wrap && !wrap.classList.contains("pm-hidden")) dismissOverlay();
     });
     document.addEventListener("click", () => { closeMenu(); }, true);
   }
 
+  // hideOverlay: esconder "de sistema" (campo sumiu, site mutado) — não marca intenção do usuário.
   function hideOverlay() { if (wrap) wrap.classList.add("pm-hidden"); }
+  // dismissOverlay: ✕/Esc — o usuário pediu para sumir. Fica escondido enquanto o campo
+  // continuar em foco (digitação e streaming não ressuscitam o card); refoco do campo reabre.
+  function dismissOverlay() { userHidden = true; closeMenu(); hideOverlay(); }
+  // showOverlay: todo caminho de render passa por aqui e respeita a dispensa do usuário.
+  function showOverlay() { if (wrap && !userHidden) wrap.classList.remove("pm-hidden"); }
 
   function buildMenu() {
     if (!menu) return;
@@ -312,7 +319,7 @@
 
   function renderInput({ model, tokens, exact, inUSD }) {
     if (!wrap) return;
-    wrap.classList.remove("pm-hidden");
+    showOverlay();
     const dot = card.querySelector(".pm-dot");
     const name = card.querySelector(".pm-model-name");
     const src = card.querySelector(".pm-src");
@@ -386,7 +393,7 @@
     resp.innerHTML = i18n("resp", "resposta") + ": <b>" + window.PM_PRICING.fmtTokens(outTokens) + "</b> tok · " +
       escapeHtml(window.PM_PRICING.fmtUSD(outUSD));
     sess.innerHTML = i18n("session", "sessão") + ": <b>" + escapeHtml(window.PM_PRICING.fmtUSD(total)) + "</b>" + brlSuffix(total);
-    wrap.classList.remove("pm-hidden");
+    showOverlay();
     position();
   }
 
@@ -409,6 +416,7 @@
     const { mutedSites = {} } = await chrome.storage.local.get(["mutedSites"]);
     if (mutedSites[location.hostname]) { hideOverlay(); return; }
     activeTarget = t;
+    userHidden = false;   // refoco do campo é o gesto que reabre o card dispensado por ✕/Esc
     ensureOverlay();
     lastTextByTarget.delete(t);
     evaluate(t, true);
@@ -444,7 +452,7 @@
       }
       if (area === "local" && changes.mutedSites) {
         const muted = (changes.mutedSites.newValue || {})[location.hostname];
-        if (muted) hideOverlay(); else if (activeTarget) { wrap && wrap.classList.remove("pm-hidden"); position(); }
+        if (muted) hideOverlay(); else if (activeTarget) { showOverlay(); position(); }
       }
     });
   }
