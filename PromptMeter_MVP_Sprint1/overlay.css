@@ -71,14 +71,17 @@
 .pm-foot b { color: #0f172a; font-weight: 700; font-variant-numeric: tabular-nums; }
 .pm-session b { color: #047857; }
 
-/* menu de seleção de modelo */
+/* menu de seleção de modelo — fora do fluxo do .pm-wrap para não deslocar o card ao abrir */
 .pm-menu {
+  position: absolute; top: 100%; left: 0; right: 0;
   margin-top: 6px;
   max-height: 320px; overflow-y: auto;
   background: #fff; border: 1px solid rgba(15,23,42,.10);
   border-radius: 12px; box-shadow: 0 12px 34px rgba(15,23,42,.16);
   padding: 6px;
 }
+/* quando não há espaço abaixo, o menu abre para cima (aplicado por position()) */
+.pm-menu.pm-menu-up { top: auto; bottom: 100%; margin-top: 0; margin-bottom: 6px; }
 .pm-menu.pm-hidden { display: none; }
 .pm-menu-title { font-size: 11px; font-weight: 700; color: #475569; padding: 4px 8px 6px; }
 .pm-menu-group {
