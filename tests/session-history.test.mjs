@@ -1,6 +1,6 @@
 /**
  * Testes da função pura rollSessionIntoHistory (base do histórico diário — issue #31).
- * Zero dependências. Uso: node --test scripts/test/
+ * Zero dependências. Uso: node --test tests/*.test.mjs (ou via node scripts/gate.mjs)
  *
  * Importa content.js como CommonJS. O arquivo é um content script (IIFE) com guardas
  * inertes (`typeof chrome`/`document`) que impedem seus efeitos colaterais de rodar em Node,
@@ -15,7 +15,7 @@ import path from "node:path";
 const require = createRequire(import.meta.url);
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const { rollSessionIntoHistory } = require(
-  path.join(HERE, "..", "..", "PromptMeter_MVP_Sprint1", "content.js")
+  path.join(HERE, "..", "PromptMeter_MVP_Sprint1", "content.js")
 );
 
 const sess = (date, inUSD, outUSD, msgs) => ({ date, inUSD, outUSD, msgs });
