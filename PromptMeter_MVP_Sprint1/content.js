@@ -11,6 +11,8 @@
   const MAX_TEXT = 200000;       // teto de caracteres analisados
   const STREAM_IDLE_MS = 1400;   // resposta considerada "pronta" após este tempo sem mudar
   const HISTORY_MAX_DAYS = 90;   // teto de datas mantidas em pmHistory (poda das mais antigas)
+  const MENU_MAX_H = 320;        // altura máxima do menu de modelos (espelha overlay.css)
+  const MENU_MIN_H = 120;        // piso: abaixo disso o menu rola em vez de encolher
   const DEBUG = (() => { try { return localStorage.getItem("PM_DEBUG") === "1"; } catch { return false; } })();
   const log = (...a) => { if (DEBUG) try { console.log("[PromptMeter]", ...a); } catch {} };
 
@@ -275,12 +277,30 @@
     let r; try { r = activeTarget.getBoundingClientRect(); } catch { return; }
     if (!r || (r.width === 0 && r.height === 0)) { hideOverlay(); return; }
     const vw = window.innerWidth, vh = window.innerHeight, margin = 8;
+    // wrap.offsetHeight = só o card: o menu é absoluto e não entra no fluxo.
     let top = r.top - (wrap.offsetHeight || 96) - margin;            // acima do campo por padrão
     if (top < 6) top = Math.min(vh - (wrap.offsetHeight || 96) - 6, r.bottom + margin);
     let left = Math.max(6, Math.min(r.left, vw - (wrap.offsetWidth || 300) - 6));
     wrap.style.position = "fixed";
     wrap.style.top = `${Math.round(top)}px`;
     wrap.style.left = `${Math.round(left)}px`;
+    positionMenu(top, r, vh);
+  }
+
+  // Escolhe o lado do menu (para baixo por padrão, para cima quando falta espaço) e
+  // limita a altura ao espaço livre — sem invadir a borda da viewport nem o campo de prompt.
+  function positionMenu(cardTop, r, vh) {
+    if (!menu || !wrap || menu.classList.contains("pm-hidden")) return;
+    const gap = 6, edge = 6;
+    const cardBottom = cardTop + (wrap.offsetHeight || 96);
+    const cardAboveField = cardBottom <= r.top + 1;                  // card ficou acima do campo
+    const spaceBelow = (cardAboveField ? r.top : vh - edge) - cardBottom - gap;
+    const spaceAbove = cardTop - (cardAboveField ? edge : r.bottom) - gap;
+    const wanted = Math.min(menu.scrollHeight, MENU_MAX_H);
+    const up = spaceBelow < wanted && spaceAbove > spaceBelow;
+    menu.classList.toggle("pm-menu-up", up);
+    const available = Math.max(MENU_MIN_H, up ? spaceAbove : spaceBelow);
+    menu.style.maxHeight = `${Math.round(Math.min(MENU_MAX_H, available))}px`;
   }
 
   // ---------- Pipeline de avaliação (entrada) ----------
