@@ -1,7 +1,8 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
-// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-20,
-// a partir das páginas oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
+// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-28
+// (bloco Anthropic; demais provedores conferidos em 2026-07-20), a partir das páginas
+// oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
 //
 // family controla a contagem de tokens:
 //   "openai"  -> contagem EXATA (tokenizer o200k_base embarcado)
@@ -11,7 +12,7 @@
 (() => {
   "use strict";
 
-  const PRICING_UPDATED = "2026-07-20";
+  const PRICING_UPDATED = "2026-07-28";
 
   // tokFactor: multiplica a contagem o200k para aproximar a tokenização da família.
   const FAMILY = {
@@ -48,11 +49,21 @@
     { id: "o3",             label: "o3",             provider: "OpenAI", family: "openai", in: 2.00,  out: 8.00 },
 
     // ---------- Anthropic (Claude) ----------
+    // Família Claude 5 (linha atual em claude.ai). Fable 5 é o topo do catálogo.
+    { id: "claude-fable-5",    label: "Claude Fable 5",    provider: "Anthropic", family: "anthropic", in: 10.00, out: 50.00 },
+    { id: "claude-opus-5",     label: "Claude Opus 5",     provider: "Anthropic", family: "anthropic", in: 5.00, out: 25.00 },
     { id: "claude-opus-4.8",   label: "Claude Opus 4.8",   provider: "Anthropic", family: "anthropic", in: 5.00, out: 25.00 },
     { id: "claude-opus-4.7",   label: "Claude Opus 4.7",   provider: "Anthropic", family: "anthropic", in: 5.00, out: 25.00 },
     { id: "claude-opus-4.6",   label: "Claude Opus 4.6",   provider: "Anthropic", family: "anthropic", in: 5.00, out: 25.00 },
     { id: "claude-sonnet-4.6", label: "Claude Sonnet 4.6", provider: "Anthropic", family: "anthropic", in: 3.00, out: 15.00 },
     { id: "claude-sonnet-4.5", label: "Claude Sonnet 4.5", provider: "Anthropic", family: "anthropic", in: 3.00, out: 15.00 },
+    // Sonnet 5 vem DEPOIS do 4.5 de propósito: o fallback por versão (models.js §2) casa
+    // por substring e "5" está contido em "4.5" — declarado antes, o texto solto
+    // "Sonnet 4.5" resolveria para Sonnet 5. Há teste de regressão em tests/models.test.mjs.
+    // Preço PADRÃO ($3/$15): a fonte oficial marca um introdutório de $2/$10 válido só até
+    // 2026-08-31. Entrar com o padrão erra para o lado caro por ~1 mês e não vira
+    // subestimativa silenciosa em 1º/09 (HANDBOOK §10: subestimar é o pior modo de falha).
+    { id: "claude-sonnet-5",   label: "Claude Sonnet 5",   provider: "Anthropic", family: "anthropic", in: 3.00, out: 15.00 },
     { id: "claude-haiku-4.5",  label: "Claude Haiku 4.5",  provider: "Anthropic", family: "anthropic", in: 1.00, out: 5.00 },
 
     // ---------- Google (Gemini) ----------

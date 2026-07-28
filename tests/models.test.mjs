@@ -23,6 +23,9 @@ test('matchModelFromText: textos reais dos 4 sites casam com o id correto', () =
     ['GPT-5.5', 'OpenAI', 'gpt-5.5'],                     // ChatGPT
     ['Claude Opus 4.8', 'Anthropic', 'claude-opus-4.8'],  // Claude
     ['Claude Sonnet 4.6', 'Anthropic', 'claude-sonnet-4.6'], // Claude
+    ['Claude Opus 5', 'Anthropic', 'claude-opus-5'],      // Claude (linha 5)
+    ['Claude Sonnet 5', 'Anthropic', 'claude-sonnet-5'],  // Claude (linha 5)
+    ['Claude Fable 5', 'Anthropic', 'claude-fable-5'],    // Claude (linha 5)
     ['Gemini 2.5 Pro', 'Google', 'gemini-2.5-pro'],       // Gemini
     ['3.5 Flash', 'Google', 'gemini-3.5-flash'],          // Gemini (só número + tier)
     ['GPT-4.1', 'OpenAI', 'gpt-4.1'],                     // GPT no Perplexity (provider explícito OpenAI)
@@ -30,6 +33,28 @@ test('matchModelFromText: textos reais dos 4 sites casam com o id correto', () =
   for (const [text, provider, id] of casos) {
     assert.equal(M.matchModelFromText(text, provider), id, `"${text}" (${provider})`);
   }
+});
+
+// ── Família Claude 5 (issue #47) ──
+// O rótulo do seletor da claude.ai nem sempre traz a palavra "Claude"; nesse caso o
+// casamento cai no fallback por versão + tier (models.js §2), que compara por substring.
+test('matchModelFromText: rótulo curto da linha 5 casa pelo fallback de versão', () => {
+  for (const [text, id] of [
+    ['Opus 5', 'claude-opus-5'],
+    ['Sonnet 5', 'claude-sonnet-5'],
+    ['Fable 5', 'claude-fable-5'],
+  ]) {
+    assert.equal(M.matchModelFromText(text, 'Anthropic'), id, `"${text}"`);
+  }
+});
+
+// Regressão que protege a ORDEM de declaração em pricing.js: "5" é substring de "4.5",
+// então declarar Sonnet 5 antes de Sonnet 4.5 faria "Sonnet 4.5" resolver para Sonnet 5
+// (mesmo tier) — trocar $3/$15 do 4.5 pelo preço de outro modelo é bug de dinheiro.
+test('matchModelFromText: "Sonnet 4.5"/"Opus 4.8" não são engolidos pela linha 5', () => {
+  assert.equal(M.matchModelFromText('Sonnet 4.5', 'Anthropic'), 'claude-sonnet-4.5');
+  assert.equal(M.matchModelFromText('Opus 4.8', 'Anthropic'), 'claude-opus-4.8');
+  assert.equal(M.matchModelFromText('Claude Sonnet 4.5', 'Anthropic'), 'claude-sonnet-4.5');
 });
 
 test('matchModelFromText: qualquer casamento pertence ao provider pedido', () => {
@@ -73,7 +98,7 @@ test('resolveModel: override inválido é ignorado (cai para detectado/padrão)'
   const win = loadExtension({ documentText: null, hostname: 'claude.ai' });
   const r = win.PM_MODELS.resolveModel('claude.ai', { 'claude.ai': 'modelo-inexistente' });
   assert.equal(r.source, 'default');
-  assert.equal(r.modelId, 'claude-sonnet-4.6'); // defaultModel do site Claude
+  assert.equal(r.modelId, 'claude-sonnet-5'); // defaultModel do site Claude
 });
 
 test('resolveModel: detecção pelo DOM vence o padrão do site', () => {
@@ -87,7 +112,14 @@ test('resolveModel: sem override nem detecção → padrão do site', () => {
   const win = loadExtension({ documentText: null, hostname: 'claude.ai' });
   const r = win.PM_MODELS.resolveModel('claude.ai', {});
   assert.equal(r.source, 'default');
-  assert.equal(r.modelId, 'claude-sonnet-4.6');
+  assert.equal(r.modelId, 'claude-sonnet-5');
+});
+
+test('resolveModel: "Claude Opus 5" no seletor da claude.ai → detected', () => {
+  const win = loadExtension({ documentText: 'Claude Opus 5', hostname: 'claude.ai' });
+  const r = win.PM_MODELS.resolveModel('claude.ai', {});
+  assert.equal(r.source, 'detected');
+  assert.equal(r.modelId, 'claude-opus-5');
 });
 
 test('resolveModel: host não suportado → padrão genérico OpenAI, site null', () => {
