@@ -28,6 +28,8 @@ Extensão Chrome (MV3) que conta tokens e mostra o **custo real** de cada prompt
 node scripts/gate.mjs
 ```
 
+Além das validações estáticas (manifest, sintaxe, 100% local, i18n, pricing/models/tokenizer), o gate **executa a suíte `node:test`** e fica vermelho se algum teste falhar. Convenção única: todo teste vive em `tests/*.test.mjs` — é o mesmo conjunto que o CI roda.
+
 ## Frota autônoma
 
 3 rodadas por dia: **Curador** ~09h30 · **Resolvedor** ~15h30 · **PR Doctor** ~20h50.

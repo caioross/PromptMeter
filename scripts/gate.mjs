@@ -229,6 +229,35 @@ const NONDELIVERABLE = [
   }
 }
 
+/* ── 8. Suíte de comportamento node:test (issue #39) ── */
+// O gate é A checagem obrigatória antes de PR (HANDBOOK §6), mas até aqui não
+// executava nenhum teste: dava para ver "GATE VERDE" localmente e quebrar o CI.
+// Convenção única de localização: TODO teste vive em tests/*.test.mjs (o mesmo
+// conjunto que o CI roda). Os arquivos são enumerados e passados explicitamente
+// porque `node --test <dir>` não varre o diretório no Node 24, e o glob literal
+// só é expandido pelo próprio Node a partir da v21 (o CI roda Node 20).
+{
+  let files = [];
+  try {
+    files = readdirSync(path.join(ROOT, 'tests'))
+      .filter((f) => f.endsWith('.test.mjs')).sort()
+      .map((f) => path.join('tests', f));
+  } catch { /* pasta ausente → tratado abaixo */ }
+
+  if (files.length === 0) {
+    fail('nenhum teste encontrado em tests/*.test.mjs (a suíte sumiu?)');
+  } else {
+    try {
+      const out = execFileSync(process.execPath, ['--test', ...files], { cwd: ROOT, encoding: 'utf8', stdio: 'pipe' });
+      const total = /^# tests (\d+)$/m.exec(out)?.[1] ?? (/^ℹ tests (\d+)$/m.exec(out)?.[1] ?? '?');
+      ok(`suíte node:test passou (${files.length} arquivos, ${total} testes)`);
+    } catch (e) {
+      const out = `${e.stdout || ''}${e.stderr || ''}`;
+      fail(`TESTES FALHANDO (node --test tests/*.test.mjs):\n${out.trim().slice(-1200)}`);
+    }
+  }
+}
+
 /* ── Relatório ── */
 const failed = results.filter((r) => !r.pass);
 console.log('\n=== GATE PromptMeter ===');
