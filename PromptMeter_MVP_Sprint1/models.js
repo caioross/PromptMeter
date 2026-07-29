@@ -32,7 +32,7 @@
     //    resolve para o flagship da família (gpt-5.6-sol), não para uma variante barata.
     //    O conjunto de tiers do texto deve ser IGUAL ao do rótulo: "2.5 flash lite"
     //    não casa em "Gemini 2.5 Flash" ({flash} vs {flash,lite}) nem o inverso.
-    const tiersOf = (s) => (s.match(/\b(opus|sonnet|haiku|pro|flash|mini|nano|lite)\b/g) || []).sort().join(" ");
+    const tiersOf = (s) => (s.match(/\b(opus|sonnet|haiku|fable|pro|flash|mini|nano|lite)\b/g) || []).sort().join(" ");
     const nTiers = tiersOf(n);
     for (const m of inProvider) {
       const ver = (m.label.match(/[0-9]+(\.[0-9]+)?/g) || []).join(" ");
@@ -72,7 +72,10 @@
       match: /(^|\.)claude\.ai$/i,
       name: "Claude",
       provider: "Anthropic",
-      defaultModel: "claude-sonnet-4.6",
+      // Linha atual do site é a Claude 5; Sonnet é o tier padrão. Preço idêntico ao do
+      // antigo padrão (Sonnet 4.6, $3/$15) — troca só corrige o RÓTULO exibido, sem
+      // mexer no número. Detecção pelo DOM continua vencendo este fallback.
+      defaultModel: "claude-sonnet-5",
       detectSelectors: [
         '[data-testid="model-selector-dropdown"]',
         'button[aria-label*="model" i]',
