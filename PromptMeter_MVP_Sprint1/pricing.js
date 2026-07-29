@@ -1,7 +1,7 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
-// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-28
-// (bloco Anthropic; demais provedores conferidos em 2026-07-20), a partir das páginas
+// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-29
+// (bloco Google; Anthropic em 2026-07-28; demais provedores em 2026-07-20), a partir das páginas
 // oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
 //
 // family controla a contagem de tokens:
@@ -12,7 +12,7 @@
 (() => {
   "use strict";
 
-  const PRICING_UPDATED = "2026-07-28";
+  const PRICING_UPDATED = "2026-07-29";
 
   // tokFactor: multiplica a contagem o200k para aproximar a tokenização da família.
   const FAMILY = {
@@ -69,7 +69,13 @@
     { id: "claude-haiku-4.5",  label: "Claude Haiku 4.5",  provider: "Anthropic", family: "anthropic", in: 1.00, out: 5.00 },
 
     // ---------- Google (Gemini) ----------
+    // 3.6 Flash é o padrão do app gemini.google.com desde 2026-07-21 (sucessor do 3.5 Flash).
+    { id: "gemini-3.6-flash",      label: "Gemini 3.6 Flash",      provider: "Google", family: "google", in: 1.50, out: 7.50 },
     { id: "gemini-3.5-flash",      label: "Gemini 3.5 Flash",      provider: "Google", family: "google", in: 1.50, out: 9.00 },
+    // Flash-Lite vem DEPOIS do Flash da mesma versão: no passo 1 de matchModelFromText o
+    // rótulo mais longo é testado primeiro, então "Gemini 3.5 Flash-Lite" casa nele mesmo
+    // (antes desta linha existir, casava por prefixo em "Gemini 3.5 Flash" — 5x o preço).
+    { id: "gemini-3.5-flash-lite", label: "Gemini 3.5 Flash-Lite", provider: "Google", family: "google", in: 0.30, out: 2.50 },
     { id: "gemini-3.1-pro",        label: "Gemini 3.1 Pro",        provider: "Google", family: "google", in: 2.00, out: 12.00 },
     { id: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite", provider: "Google", family: "google", in: 0.25, out: 1.50 },
     { id: "gemini-2.5-pro",        label: "Gemini 2.5 Pro",        provider: "Google", family: "google", in: 1.25, out: 10.00 },

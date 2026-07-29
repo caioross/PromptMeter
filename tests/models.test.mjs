@@ -57,6 +57,31 @@ test('matchModelFromText: "Sonnet 4.5"/"Opus 4.8" não são engolidos pela linha
   assert.equal(M.matchModelFromText('Claude Sonnet 4.5', 'Anthropic'), 'claude-sonnet-4.5');
 });
 
+// ── Gemini 3.6 Flash / 3.5 Flash-Lite (issue #50) ──
+// "Gemini 3.5 Flash-Lite" casava por prefixo em "Gemini 3.5 Flash" (5x o input, 3,6x o
+// output). Ter o rótulo longo na tabela resolve pelo passo 1, que ordena por comprimento.
+test('matchModelFromText: Gemini 3.6 Flash e 3.5 Flash-Lite casam no id próprio', () => {
+  assert.equal(M.matchModelFromText('Gemini 3.6 Flash', 'Google'), 'gemini-3.6-flash');
+  assert.equal(M.matchModelFromText('Gemini 3.5 Flash-Lite', 'Google'), 'gemini-3.5-flash-lite');
+});
+
+test('matchModelFromText: Gemini sem regressão nos rótulos já suportados', () => {
+  for (const [text, id] of [
+    ['Gemini 3.5 Flash', 'gemini-3.5-flash'],
+    ['Gemini 3.1 Flash-Lite', 'gemini-3.1-flash-lite'],
+    ['Gemini 2.5 Pro', 'gemini-2.5-pro'],
+  ]) {
+    assert.equal(M.matchModelFromText(text, 'Google'), id, `"${text}"`);
+  }
+});
+
+test('resolveModel Gemini: sem detecção → padrão gemini-3.6-flash', () => {
+  const win = loadExtension({ documentText: null, hostname: 'gemini.google.com' });
+  const r = win.PM_MODELS.resolveModel('gemini.google.com', {});
+  assert.equal(r.source, 'default');
+  assert.equal(r.modelId, 'gemini-3.6-flash');
+});
+
 test('matchModelFromText: qualquer casamento pertence ao provider pedido', () => {
   // O filtro de provider garante que nunca se casa um modelo de outro provedor.
   // (O fallback por número é frouxo — ex.: "4" em "Opus 4.8" pode casar GPT-4o —,
