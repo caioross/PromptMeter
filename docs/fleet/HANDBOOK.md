@@ -58,7 +58,9 @@ Antes de trabalhar uma issue, confira as **3 fontes** (nenhuma pode existir): la
 node scripts/gate.mjs
 ```
 
-Zero dependências. Valida: manifest MV3 (permissão única `storage`, arquivos referenciados existem), sintaxe de todos os `.js`, **invariante 100% local** (nenhuma API de rede na extensão), i18n (pt_BR e en com as mesmas chaves), e o produto carregado de verdade em sandbox: tokenizer conta, tabela de preços íntegra (ids únicos, valores positivos, famílias válidas), matemática do custo exata, e `defaultModel` de cada site existente na tabela.
+Zero dependências. Valida: manifest MV3 (permissão única `storage`, arquivos referenciados existem), sintaxe de todos os `.js`, **invariante 100% local** (nenhuma API de rede na extensão), i18n (pt_BR e en com as mesmas chaves), e o produto carregado de verdade em sandbox: tokenizer conta, tabela de preços íntegra (ids únicos, valores positivos, famílias válidas), matemática do custo exata, e `defaultModel` de cada site existente na tabela. Por fim, **executa a suíte `node:test`** e fica vermelho se algum teste falhar (issue #39) — assim gate local e CI cobrem o mesmo conjunto.
+
+- **Convenção única de testes**: todo teste vive em `tests/*.test.mjs` (não recursivo). O gate enumera esses arquivos e os passa explicitamente ao `node --test`, porque `node --test <dir>` não varre o diretório no Node 24 e o glob literal só é expandido pelo Node ≥21 (o CI roda Node 20).
 
 - Gate vermelho sem correção honesta dentro do escopo → PR em **DRAFT** explicando.
 - **NUNCA enfraquecer, pular ou editar o gate para passar.** Mudança no gate = quórum §7.2.
