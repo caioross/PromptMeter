@@ -60,10 +60,12 @@
     // Sonnet 5 vem DEPOIS do 4.5 de propósito: o fallback por versão (models.js §2) casa
     // por substring e "5" está contido em "4.5" — declarado antes, o texto solto
     // "Sonnet 4.5" resolveria para Sonnet 5. Há teste de regressão em tests/models.test.mjs.
-    // Preço PADRÃO ($3/$15): a fonte oficial marca um introdutório de $2/$10 válido só até
-    // 2026-08-31. Entrar com o padrão erra para o lado caro por ~1 mês e não vira
-    // subestimativa silenciosa em 1º/09 (HANDBOOK §10: subestimar é o pior modo de falha).
-    { id: "claude-sonnet-5",   label: "Claude Sonnet 5",   provider: "Anthropic", family: "anthropic", in: 3.00, out: 15.00 },
+    // ⚠️ PREÇO COM DATA DE VALIDADE — VIRAR PARA in: 3.00, out: 15.00 EM 2026-09-01 (issue #53).
+    // A fonte oficial lista DUAS linhas para o Sonnet 5: introdutório $2/$10 até 2026-08-31 e
+    // padrão $3/$15 a partir de 2026-09-01. Vale o preço VIGENTE — exibir $3/$15 hoje cobraria
+    // +50% do que a Anthropic cobra de fato. A tabela não tem preço por data (seria mudança de
+    // arquitetura, decisão do dono), então a virada é manual e está travada pela issue #53.
+    { id: "claude-sonnet-5",   label: "Claude Sonnet 5",   provider: "Anthropic", family: "anthropic", in: 2.00, out: 10.00 },
     { id: "claude-haiku-4.5",  label: "Claude Haiku 4.5",  provider: "Anthropic", family: "anthropic", in: 1.00, out: 5.00 },
 
     // ---------- Google (Gemini) ----------
