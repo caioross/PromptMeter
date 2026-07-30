@@ -1,8 +1,9 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
-// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-28
-// (bloco Anthropic; demais provedores conferidos em 2026-07-20), a partir das páginas
-// oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
+// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-29
+// (só os três Gemini Flash: 3.6, 3.5 e 3.5-Lite; Anthropic em 2026-07-28; o resto da
+// tabela — incluindo os demais Gemini — em 2026-07-20), a partir das páginas oficiais
+// de preços (OpenAI, Anthropic, Google, Perplexity).
 //
 // family controla a contagem de tokens:
 //   "openai"  -> contagem EXATA (tokenizer o200k_base embarcado)
@@ -12,7 +13,7 @@
 (() => {
   "use strict";
 
-  const PRICING_UPDATED = "2026-07-28";
+  const PRICING_UPDATED = "2026-07-29";
 
   // tokFactor: multiplica a contagem o200k para aproximar a tokenização da família.
   const FAMILY = {
@@ -69,7 +70,14 @@
     { id: "claude-haiku-4.5",  label: "Claude Haiku 4.5",  provider: "Anthropic", family: "anthropic", in: 1.00, out: 5.00 },
 
     // ---------- Google (Gemini) ----------
+    // 3.6 Flash e 3.5 Flash-Lite lançados em 2026-07-21.
+    { id: "gemini-3.6-flash",      label: "Gemini 3.6 Flash",      provider: "Google", family: "google", in: 1.50, out: 7.50 },
     { id: "gemini-3.5-flash",      label: "Gemini 3.5 Flash",      provider: "Google", family: "google", in: 1.50, out: 9.00 },
+    // O que corrige o casamento do Flash-Lite é EXISTIR nesta tabela, não a posição da
+    // linha: o passo 1 de matchModelFromText ordena os candidatos por comprimento do
+    // rótulo (models.js:19), então "Gemini 3.5 Flash-Lite" (21) é testado antes de
+    // "Gemini 3.5 Flash" (16). Sem esta linha, casava por prefixo no Flash — 5x o preço.
+    { id: "gemini-3.5-flash-lite", label: "Gemini 3.5 Flash-Lite", provider: "Google", family: "google", in: 0.30, out: 2.50 },
     { id: "gemini-3.1-pro",        label: "Gemini 3.1 Pro",        provider: "Google", family: "google", in: 2.00, out: 12.00 },
     { id: "gemini-3.1-flash-lite", label: "Gemini 3.1 Flash-Lite", provider: "Google", family: "google", in: 0.25, out: 1.50 },
     { id: "gemini-2.5-pro",        label: "Gemini 2.5 Pro",        provider: "Google", family: "google", in: 1.25, out: 10.00 },
