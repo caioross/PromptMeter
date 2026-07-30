@@ -87,9 +87,12 @@
       match: /(^|\.)gemini\.google\.com$/i,
       name: "Gemini",
       provider: "Google",
-      // Padrão do app desde 2026-07-21: o 3.6 Flash substituiu o 3.5 Flash. Preço de
-      // output diferente ($7.50 vs $9.00), então manter o antigo superestimava em 20%.
-      defaultModel: "gemini-3.6-flash",
+      // Fica no 3.5 Flash de propósito. O 3.6 Flash (2026-07-21) existe na tabela e é
+      // detectado quando o seletor é legível, mas a release note oficial diz que ele
+      // precisa ser ESCOLHIDO no menu de modelos — nenhuma fonte confirma que virou o
+      // padrão do app. Este valor só vale quando a detecção falha, e aí errar para cima
+      // ($9.00 vs $7.50) é o lado honesto num medidor de custo: nunca subestimar.
+      defaultModel: "gemini-3.5-flash",
       detectSelectors: [
         'button[aria-label*="model" i]',
         '[data-test-id="bard-mode-menu-button"]',

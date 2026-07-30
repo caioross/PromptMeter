@@ -75,11 +75,14 @@ test('matchModelFromText: Gemini sem regressão nos rótulos já suportados', ()
   }
 });
 
-test('resolveModel Gemini: sem detecção → padrão gemini-3.6-flash', () => {
+// O padrão do site NÃO muda para 3.6: a release note oficial manda escolher o 3.6 Flash
+// no menu de modelos, e nada confirma que ele virou o padrão do app. Sem detecção, errar
+// para cima ($9.00) é preferível a subestimar ($7.50) num medidor de custo.
+test('resolveModel Gemini: sem detecção → padrão segue gemini-3.5-flash', () => {
   const win = loadExtension({ documentText: null, hostname: 'gemini.google.com' });
   const r = win.PM_MODELS.resolveModel('gemini.google.com', {});
   assert.equal(r.source, 'default');
-  assert.equal(r.modelId, 'gemini-3.6-flash');
+  assert.equal(r.modelId, 'gemini-3.5-flash');
 });
 
 test('matchModelFromText: qualquer casamento pertence ao provider pedido', () => {
