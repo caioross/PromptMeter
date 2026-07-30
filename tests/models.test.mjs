@@ -85,6 +85,53 @@ test('resolveModel Gemini: sem detecção → padrão segue gemini-3.5-flash', (
   assert.equal(r.modelId, 'gemini-3.5-flash');
 });
 
+// ── OpenAI: tier Pro e variantes ausentes (issue #51) ──
+// O guard `after` (models.js:26) só rejeita a continuação quando ela é dígito ou ponto,
+// então um sufixo de TIER passava batido e o rótulo curto vencia: "GPT-5 Pro" casava em
+// gpt-5 ($1.25/$10) valendo $15/$120 — 8% do custo real. Ter o rótulo longo na tabela
+// resolve pelo passo 1, que ordena por comprimento de rótulo (mesmo remédio da #50).
+test('matchModelFromText: tier Pro casa no id próprio, não no modelo base', () => {
+  for (const [text, id] of [
+    ['GPT-5 Pro', 'gpt-5-pro'],
+    ['GPT-5.4 Pro', 'gpt-5.4-pro'],
+    ['GPT-5.5 Pro', 'gpt-5.5-pro'],
+  ]) {
+    assert.equal(M.matchModelFromText(text, 'OpenAI'), id, `"${text}"`);
+  }
+});
+
+test('matchModelFromText: GPT-5.2, GPT-4.1 nano e o3-mini casam no id próprio', () => {
+  for (const [text, id] of [
+    ['GPT-5.2', 'gpt-5.2'],            // antes: gpt-5 (71% do real)
+    ['GPT-4.1 nano', 'gpt-4.1-nano'],  // antes: gpt-4.1 (20x o real)
+    ['o3-mini', 'o3-mini'],            // antes: o3 (1,8x o real)
+  ]) {
+    assert.equal(M.matchModelFromText(text, 'OpenAI'), id, `"${text}"`);
+  }
+});
+
+test('matchModelFromText: OpenAI sem regressão nos rótulos já suportados', () => {
+  for (const [text, id] of [
+    ['GPT-5.6 Sol', 'gpt-5.6-sol'],
+    ['GPT-5.6', 'gpt-5.6-sol'],   // rótulo genérico → flagship da família (fallback §2)
+    ['GPT-5.4 mini', 'gpt-5.4-mini'],
+    ['GPT-5', 'gpt-5'],
+    ['GPT-5 mini', 'gpt-5-mini'],
+    ['GPT-4.1', 'gpt-4.1'],
+    ['GPT-4o mini', 'gpt-4o-mini'],
+    ['o3', 'o3'],
+  ]) {
+    assert.equal(M.matchModelFromText(text, 'OpenAI'), id, `"${text}"`);
+  }
+});
+
+// Perplexity tem provider ABERTO (models.js:110): "GPT-5 Pro" e "Sonar Pro" têm rótulos
+// do mesmo comprimento, então a ordenação do passo 1 não pode deixar um roubar o outro.
+test('matchModelFromText: "Sonar Pro" não é engolido pelo novo "GPT-5 Pro"', () => {
+  assert.equal(M.matchModelFromText('Sonar Pro', null), 'sonar-pro');
+  assert.equal(M.matchModelFromText('Sonar', null), 'sonar');
+});
+
 test('matchModelFromText: qualquer casamento pertence ao provider pedido', () => {
   // O filtro de provider garante que nunca se casa um modelo de outro provedor.
   // (O fallback por número é frouxo — ex.: "4" em "Opus 4.8" pode casar GPT-4o —,
