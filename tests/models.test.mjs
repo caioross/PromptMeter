@@ -132,6 +132,41 @@ test('matchModelFromText: "Sonar Pro" não é engolido pelo novo "GPT-5 Pro"', (
   assert.equal(M.matchModelFromText('Sonar', null), 'sonar');
 });
 
+// ── Passo 2 com provider ABERTO: não fabricar custo (quórum da PR #59) ──
+// "GPT-5 Pro" é o primeiro rótulo OpenAI cujo tier é {pro} e cuja versão é o "5" nu.
+// Com o teste de versão por SUBSTRING, esse "5" casava dentro do "1.5" de "Gemini 1.5
+// Pro" e o Perplexity precificava um Gemini como gpt-5-pro ($15/$120 em vez de $1/$1),
+// com source "detected" — fabricação de custo (issue #34, HANDBOOK §10). O passo 2 agora
+// exige a versão como TOKEN inteiro e, quando o provider é aberto, também a MARCA.
+test('matchModelFromText: modelo de outro provedor fora da tabela não vira GPT (provider aberto)', () => {
+  for (const text of [
+    'Gemini 1.5 Pro', 'Gemini 3.5 Pro', 'Grok 4.5 Pro', 'DeepSeek V3.5 Pro',
+    'Llama 4.5 Pro', 'Qwen 3.5 Pro', 'Mistral Large 5 Pro',
+  ]) {
+    assert.equal(M.matchModelFromText(text, null), null, `"${text}" fabricou um modelo`);
+  }
+});
+
+test('matchModelFromText: passo 2 legítimo segue funcionando após o guard de token/marca', () => {
+  // Rótulo genérico → flagship da família, com provider conhecido E aberto.
+  assert.equal(M.matchModelFromText('GPT-5.6', 'OpenAI'), 'gpt-5.6-sol');
+  assert.equal(M.matchModelFromText('GPT-5.6', null), 'gpt-5.6-sol');
+  // Versão nua sem marca continua válida quando o provider é conhecido (o host garante).
+  assert.equal(M.matchModelFromText('5.4 mini', 'OpenAI'), 'gpt-5.4-mini');
+  assert.equal(M.matchModelFromText('2.5 flash lite', 'Google'), 'gemini-2.5-flash-lite');
+  assert.equal(M.matchModelFromText('Opus 4.8', 'Anthropic'), 'claude-opus-4.8');
+});
+
+test('matchModelFromText: todo rótulo da tabela casa no próprio id, com e sem provider', () => {
+  // Invariante forte contra dano colateral de rótulo novo: nenhum modelo pode roubar o
+  // casamento de outro, nem no modo filtrado (ChatGPT/Claude/Gemini) nem no aberto
+  // (Perplexity, onde os 43 rótulos competem entre si).
+  for (const m of W.PM_PRICING.listModels()) {
+    assert.equal(M.matchModelFromText(m.label, m.provider), m.id, `filtrado: "${m.label}"`);
+    assert.equal(M.matchModelFromText(m.label, null), m.id, `aberto: "${m.label}"`);
+  }
+});
+
 test('matchModelFromText: qualquer casamento pertence ao provider pedido', () => {
   // O filtro de provider garante que nunca se casa um modelo de outro provedor.
   // (O fallback por número é frouxo — ex.: "4" em "Opus 4.8" pode casar GPT-4o —,

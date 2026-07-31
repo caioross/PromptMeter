@@ -1,10 +1,10 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
 // Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-30
-// (OpenAI inteira, em developers.openai.com/api/docs/pricing: os 15 modelos que já
-// estavam na tabela conferem e 6 novos entraram; os três Gemini Flash em 2026-07-29;
-// Anthropic em 2026-07-28; o resto da tabela em 2026-07-20), a partir das páginas
-// oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
+// (OpenAI inteira, em developers.openai.com/api/docs/pricing: 6 modelos novos entraram,
+// Terra e Luna estavam desatualizados e foram corrigidos, os outros 13 conferem; os três
+// Gemini Flash em 2026-07-29; Anthropic em 2026-07-28; o resto da tabela em 2026-07-20),
+// a partir das páginas oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
 //
 // family controla a contagem de tokens:
 //   "openai"  -> contagem EXATA (tokenizer o200k_base embarcado)
@@ -35,8 +35,11 @@
     // Família GPT-5.6 (GA 2026-07-09) — flagship atual. Sol declarado primeiro: é o
     // fallback da família quando o seletor exibe só "GPT-5.6" (ver models.js §fallback).
     { id: "gpt-5.6-sol",    label: "GPT-5.6 Sol",    provider: "OpenAI", family: "openai", in: 5.00,  out: 30.00 },
-    { id: "gpt-5.6-terra",  label: "GPT-5.6 Terra",  provider: "OpenAI", family: "openai", in: 2.50,  out: 15.00 },
-    { id: "gpt-5.6-luna",   label: "GPT-5.6 Luna",   provider: "OpenAI", family: "openai", in: 1.00,  out: 6.00 },
+    // Terra e Luna baixaram de preço na conferência de 2026-07-30 (antes $2.50/$15 e
+    // $1.00/$6 na tabela): o overlay cobrava 5x o real no Luna. Fonte: a mesma página
+    // oficial da issue #51 — corrigido aqui porque a data acima cobre a OpenAI inteira.
+    { id: "gpt-5.6-terra",  label: "GPT-5.6 Terra",  provider: "OpenAI", family: "openai", in: 2.00,  out: 12.00 },
+    { id: "gpt-5.6-luna",   label: "GPT-5.6 Luna",   provider: "OpenAI", family: "openai", in: 0.20,  out: 1.20 },
     // Tier Pro (issue #51): o rótulo LONGO é o que corrige o casamento. Sem a linha
     // "GPT-5 Pro", o passo 1 de matchModelFromText casava por prefixo em "GPT-5" — o
     // guard `after` (models.js:26) só barra dígito/ponto, não a palavra de tier — e o
