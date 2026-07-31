@@ -68,7 +68,7 @@ Uma extensão Chrome que conta os **tokens** e calcula o **custo** do seu prompt
 |---|---|
 | 🔢 **Contagem real de tokens** | Tokenizer `o200k_base` embarcado conta **exatamente** os tokens dos modelos OpenAI. Claude, Gemini e outros usam **estimativa calibrada**, sempre marcada com `~`. |
 | 💵 **Custo em USD e R$** | Preço calculado na hora, em dólar e real (cotação ajustável). Atualizado com os preços oficiais de cada modelo. |
-| 🎯 **Detecta o modelo sozinho** | Identifica o modelo ativo no ChatGPT, Claude e Gemini. Errou? Troque com um clique — a escolha fica salva **por site**. |
+| 🎯 **Detecta o modelo sozinho** | Identifica o modelo ativo no ChatGPT, Claude, Gemini e Perplexity. Errou? Troque com um clique — a escolha fica salva **por site**. |
 | 📈 **Resposta + sessão** | Estima também os tokens da resposta e soma o gasto do dia — você enxerga quanto a conversa **realmente** custou. |
 | 🔒 **Privado por construção** | Sem backend, sem conta, sem telemetria. Funciona até offline. |
 | ⚡ **Instantâneo** | Cálculo em milissegundos a cada tecla, com debounce. Zero requisições de rede. |
@@ -102,19 +102,21 @@ O modelo cobrado é sempre **trocável em 1 clique** no próprio card, com a esc
 
 ## 💵 Preços & precisão
 
-A tabela em [`pricing.js`](PromptMeter_MVP_Sprint1/pricing.js) traz os preços oficiais por **1M de tokens**, atualizados em **2026-06-06** (OpenAI, Anthropic, Google). Alguns flagships:
+A tabela em [`pricing.js`](PromptMeter_MVP_Sprint1/pricing.js) traz os preços oficiais por **1M de tokens**. A **data da última conferência** não é repetida aqui (para não envelhecer): ela vive no próprio arquivo, na constante `PRICING_UPDATED`, e a extensão a exibe. Alguns flagships:
 
 | Modelo | Provedor | Entrada / 1M | Saída / 1M | Tokens |
 |---|---|---:|---:|:---:|
-| GPT-5.5 | OpenAI | $5.00 | $30.00 | exata |
+| GPT-5.6 Sol | OpenAI | $5.00 | $30.00 | exata |
+| GPT-5.6 Luna | OpenAI | $1.00 | $6.00 | exata |
 | GPT-5 | OpenAI | $1.25 | $10.00 | exata |
 | GPT-4o mini | OpenAI | $0.15 | $0.60 | exata |
-| Claude Opus 4.8 | Anthropic | $5.00 | $25.00 | `~` |
-| Claude Sonnet 4.6 | Anthropic | $3.00 | $15.00 | `~` |
-| Gemini 3.5 Flash | Google | $1.50 | $9.00 | `~` |
+| Claude Opus 5 | Anthropic | $5.00 | $25.00 | `~` |
+| Claude Sonnet 5 | Anthropic | $2.00 | $10.00 | `~` |
+| Claude Haiku 4.5 | Anthropic | $1.00 | $5.00 | `~` |
+| Gemini 3.6 Flash | Google | $1.50 | $7.50 | `~` |
 | Gemini 2.5 Flash-Lite | Google | $0.10 | $0.40 | `~` |
 
-> A lista completa (mais de 20 modelos, incluindo Grok e DeepSeek) está em `pricing.js`, é visível na extensão e editável. A cotação do dólar é ajustável nas Opções.
+> A lista completa — **dezenas de modelos** de **OpenAI, Anthropic, Google, Perplexity (Sonar), xAI (Grok) e DeepSeek** — está em [`pricing.js`](PromptMeter_MVP_Sprint1/pricing.js), é visível na extensão e editável. Preços ainda não confirmados numa página oficial ficam marcados com `est: true` no arquivo. A cotação do dólar é ajustável nas Opções.
 
 **Precisão da contagem:** OpenAI é **exata** (tokenizer embarcado). Para os demais provedores, aplicamos um fator de calibração por família (`tokFactor`) sobre o `o200k_base` — uma estimativa próxima, **sempre sinalizada com `~`**.
 
@@ -172,7 +174,7 @@ A landing page vive em **[promptmeter-pi.vercel.app](https://promptmeter-pi.verc
 - 🚀 **SEO completo**: Open Graph dinâmico, dados estruturados (`SoftwareApplication` + `FAQPage`), `sitemap.xml`, `robots.txt`, `hreflang` PT/EN e manifest PWA;
 - 🌍 **bilíngue** (PT-BR / EN).
 
-O código do site está em [`site/`](site/) (veja o [README do site](site/README.md)).
+O código do site vive num **repositório separado** — não está neste repo (a pasta `site/` é ignorada pelo `.gitignore`).
 
 ## ❓ FAQ
 
@@ -204,9 +206,9 @@ Para modelos **OpenAI** sim — a extensão embarca o tokenizer `o200k_base`. Pa
 
 - [ ] Publicação na **Chrome Web Store**.
 - [ ] **Atalho de envio** (Enter/botão) com transição suave do card.
-- [ ] Mais provedores e **modelos** na tabela (xAI, DeepSeek confirmados).
 - [ ] **Histórico de sessão** e exportação (CSV) do gasto.
-- [ ] Suíte de **testes** (vitest + jsdom) para tokenização e cálculo de custo.
+- [x] Mais provedores e **modelos** na tabela — xAI (Grok), DeepSeek e Perplexity (Sonar) já entraram.
+- [x] Suíte de **testes** para tokenização e cálculo de custo — em [`tests/`](tests/), com `node:test` (zero dependências), executada pelo gate.
 
 ---
 
