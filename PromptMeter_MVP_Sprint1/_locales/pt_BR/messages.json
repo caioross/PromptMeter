@@ -7,6 +7,8 @@
   "resp": { "message": "resposta" },
   "session": { "message": "sessão" },
   "session_total": { "message": "Total estimado hoje" },
+  "session_off": { "message": "Total da sessão desligado nas Opções" },
+  "session_frozen": { "message": "Total de hoje até o rastreamento ser desligado nas Opções" },
   "pick_model": { "message": "Escolha o modelo cobrado" },
   "prices_per_m": { "message": "USD por 1M tokens (entrada / saída)" },
   "exact": { "message": "contagem exata" },

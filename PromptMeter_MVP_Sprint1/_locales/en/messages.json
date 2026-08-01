@@ -7,6 +7,8 @@
   "resp": { "message": "response" },
   "session": { "message": "session" },
   "session_total": { "message": "Estimated total today" },
+  "session_off": { "message": "Session total is turned off in Options" },
+  "session_frozen": { "message": "Today's total up to when tracking was turned off in Options" },
   "pick_model": { "message": "Pick the billed model" },
   "prices_per_m": { "message": "USD per 1M tokens (input / output)" },
   "exact": { "message": "exact count" },
