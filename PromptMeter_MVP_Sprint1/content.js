@@ -36,6 +36,8 @@
   const processedResponses = new WeakSet();
   const respLen = new WeakMap(); // node -> último comprimento conhecido (para detectar fim do stream)
   let userHidden = false;        // usuário dispensou o card (✕/Esc); só refoco do campo reabre
+  let sessionFooterPainted = false; // o rodapé "sessão" já exibe um total real (hidratado ou de resposta)
+  let hydratingFooter = false;      // guarda de reentrância: focusin dispara várias vezes
 
   // ---------- Settings ----------
   const DEFAULTS = {
@@ -95,6 +97,17 @@
     }
     return pmSession;
   }
+  // Deriva o que o rodapé "sessão" deve afirmar. Função PURA: não lê storage nem toca no DOM.
+  // - só conta a sessão do dia corrente (sessão de ontem vale 0: o dia novo começa zerado);
+  // - com `trackResponses` desligado e nada acumulado hoje, o rodapé NÃO afirma "$0" (show=false):
+  //   um zero sob "Total estimado hoje" seria mentira sobre dinheiro quando ninguém está medindo.
+  function sessionFooterState(session, dayKey, trackResponses) {
+    const sameDay = !!(session && dayKey && session.date === dayKey);
+    const total = sameDay ? (Number(session.inUSD) || 0) + (Number(session.outUSD) || 0) : 0;
+    const off = trackResponses === false;
+    return { total, off, show: !off || total > 0 };
+  }
+
   async function addToSession(inUSD, outUSD) {
     const s = await getSession();
     s.inUSD += (Number(inUSD) || 0);
@@ -195,7 +208,7 @@
       </div>
       <div class="pm-foot" role="status" aria-live="polite">
         <span class="pm-resp" title="${escapeHtml(i18n("response_cost", "Custo da última resposta"))}">${escapeHtml(i18n("resp_idle", "resposta: —"))}</span>
-        <span class="pm-session" title="${escapeHtml(i18n("session_total", "Total estimado hoje"))}">${escapeHtml(i18n("session", "sessão"))}: $0</span>
+        <span class="pm-session" title="${escapeHtml(i18n("session_total", "Total estimado hoje"))}">${escapeHtml(i18n("session", "sessão"))}: —</span>
       </div>`;
     wrap.appendChild(card);
     menu = el("div", "pm-menu pm-hidden");
@@ -408,13 +421,47 @@
   function renderResponse({ outTokens, outUSD, session }) {
     if (!wrap) return;
     const resp = card.querySelector(".pm-resp");
-    const sess = card.querySelector(".pm-session");
-    const total = (session.inUSD + session.outUSD);
     resp.innerHTML = i18n("resp", "resposta") + ": <b>" + window.PM_PRICING.fmtTokens(outTokens) + "</b> tok · " +
       escapeHtml(window.PM_PRICING.fmtUSD(outUSD));
-    sess.innerHTML = i18n("session", "sessão") + ": <b>" + escapeHtml(window.PM_PRICING.fmtUSD(total)) + "</b>" + brlSuffix(total);
+    renderSessionFooter(sessionFooterState(session, todayKey(), settings && settings.trackResponses));
     showOverlay();
     position();
+  }
+
+  // Único ponto que pinta o rodapé "sessão" — usado tanto pela hidratação (montagem do card)
+  // quanto pelo fim de uma resposta, para os dois caminhos nunca divergirem.
+  function renderSessionFooter(state) {
+    if (!card) return;
+    const sess = card.querySelector(".pm-session");
+    if (!sess) return;
+    const label = i18n("session", "sessão");
+    if (!state.show) {
+      sess.textContent = `${label}: —`;
+      sess.title = i18n("session_off", "Total da sessão desligado nas Opções");
+    } else {
+      sess.innerHTML = label + ": <b>" + escapeHtml(window.PM_PRICING.fmtUSD(state.total)) + "</b>" + brlSuffix(state.total);
+      sess.title = state.off
+        ? i18n("session_frozen", "Total de hoje até o rastreamento ser desligado nas Opções")
+        : i18n("session_total", "Total estimado hoje");
+    }
+    sessionFooterPainted = true;
+  }
+
+  // Lê o acumulado do dia UMA vez por montagem do card: `getSession()` faz I/O e consolida
+  // o histórico na virada do dia, então não pode entrar no caminho da digitação.
+  async function hydrateSessionFooter() {
+    if (!wrap || sessionFooterPainted || hydratingFooter) return;
+    hydratingFooter = true;
+    try {
+      const s = await getSession();
+      // Uma resposta pode ter terminado durante o await: o total dela é mais fresco que este.
+      if (sessionFooterPainted) return;
+      renderSessionFooter(sessionFooterState(s, todayKey(), settings && settings.trackResponses));
+    } catch (e) {
+      log("hidratação do rodapé falhou", e);
+    } finally {
+      hydratingFooter = false;
+    }
   }
 
   let respObserver = null;
@@ -438,6 +485,7 @@
     activeTarget = t;
     userHidden = false;   // refoco do campo é o gesto que reabre o card dispensado por ✕/Esc
     ensureOverlay();
+    hydrateSessionFooter();   // sem await: o card não espera I/O para mostrar tokens/custo
     lastTextByTarget.delete(t);
     evaluate(t, true);
   }
@@ -468,7 +516,12 @@
   if (typeof chrome !== "undefined" && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === "sync" && (changes.currency || changes.brlRate || changes.trackResponses || changes.modelOverrides)) {
-        loadSettings().then(() => { if (activeTarget) evaluate(activeTarget, true); });
+        loadSettings().then(() => {
+          if (activeTarget) evaluate(activeTarget, true);
+          // Moeda, cotação e rastreamento mudam o que o rodapé deve dizer: repinte-o do storage.
+          sessionFooterPainted = false;
+          hydrateSessionFooter();
+        });
       }
       if (area === "local" && changes.mutedSites) {
         const muted = (changes.mutedSites.newValue || {})[location.hostname];
@@ -482,6 +535,6 @@
 
   // Export só em Node (CommonJS) para o teste da função pura; no browser `module` é undefined.
   if (typeof module !== "undefined" && module.exports) {
-    module.exports = { rollSessionIntoHistory };
+    module.exports = { rollSessionIntoHistory, sessionFooterState };
   }
 })();
