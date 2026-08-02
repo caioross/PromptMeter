@@ -1,6 +1,6 @@
 # Listing da Chrome Web Store — PromptMeter
 
-**Versão da extensão:** 0.4.0 · **Última revisão deste texto:** 2026-07-22
+**Versão da extensão:** 0.4.0 · **Última revisão deste texto:** 2026-08-02
 
 Pacote de textos prontos para copiar/colar no **Chrome Web Store Developer Console**
 (aba *Store listing* / *Privacy*). Fonte de verdade única: este arquivo é versionado
@@ -14,6 +14,12 @@ e revisável em PR — a publicação em si é do dono (HANDBOOK §7.1, issue #6
 >   enganosa é motivo de rejeição na review da Store ("Misleading description") e viola
 >   a exatidão honesta (HANDBOOK §2/§10).
 > - Nada de preço ou número de modelos inventado: puxar de `PromptMeter_MVP_Sprint1/pricing.js`.
+> - **Evite número cravado de modelos no texto da Store** (este arquivo já envelheceu duas vezes
+>   assim): o texto publicado cita **famílias**, não contagem. Para conferir a tabela ao revisar:
+>   ```bash
+>   grep -c '{ id: "' PromptMeter_MVP_Sprint1/pricing.js                    # 37 em 2026-08-02
+>   grep -o 'provider: "[^"]*"' PromptMeter_MVP_Sprint1/pricing.js | sort -u # provedores citados
+>   ```
 
 **Índice:** [PT-BR](#-português-pt-br) · [EN](#-english-en) · [Campos do formulário](#-campos-do-formulário-comuns)
 
@@ -35,7 +41,7 @@ PromptMeter — Medidor de Custo
 Conte tokens e veja o custo de cada prompt em USD e R$, em tempo real. 100% local, sem IA. ChatGPT, Claude, Gemini, Perplexity.
 ```
 
-> **127 caracteres** (limite 132). Conferido em 2026-07-22.
+> **127 caracteres** (limite 132). Conferido em 2026-08-02.
 
 ### Descrição longa (campo *Description*)
 
@@ -67,9 +73,9 @@ Nenhuma IA é chamada para "estimar" nada. Mesmo texto, mesmo modelo, mesmo resu
 
 PRECISÃO: O QUE É EXATO E O QUE É ESTIMATIVA
 Seja bem-vindo à parte honesta. A extensão embarca o tokenizer o200k_base:
-• Modelos OpenAI (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, o3): contagem EXATA.
-• Anthropic (Claude), Google (Gemini), xAI (Grok) e DeepSeek: ESTIMATIVA calibrada — a contagem o200k_base é ajustada por um fator por família, porque esses provedores usam tokenizadores próprios. O número é próximo, não exato, e a interface sempre marca isso com "~".
-Os preços vêm de uma tabela local com 26 modelos, conferida nas páginas oficiais de preços de cada provedor; a data da última conferência fica no próprio código. Preços mudam — trate o valor como uma referência muito boa, não como sua fatura.
+• Modelos OpenAI (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, GPT-5.6, o3): contagem EXATA.
+• Anthropic (Claude), Google (Gemini), Perplexity (Sonar), xAI (Grok) e DeepSeek: ESTIMATIVA calibrada — a contagem o200k_base é ajustada por um fator por família, porque esses provedores usam tokenizadores próprios. O número é próximo, não exato, e a interface sempre marca isso com "~".
+Os preços vêm de uma tabela local que cobre os modelos correntes de OpenAI, Anthropic, Google, Perplexity, xAI e DeepSeek, conferidos nas páginas oficiais de preços de cada provedor; a data da última conferência fica no próprio código. Preços mudam — trate o valor como uma referência muito boa, não como sua fatura.
 
 PERMISSÃO
 Uma só: "storage", para salvar as suas preferências (moeda, cotação do R$, modelo escolhido por site, total do dia) no seu próprio navegador. Nada é enviado para lugar nenhum.
@@ -96,7 +102,7 @@ PromptMeter — Cost Meter
 Count tokens and see what each prompt costs in USD and BRL, live. 100% local, no AI. ChatGPT, Claude, Gemini, Perplexity.
 ```
 
-> **121 characters** (limit 132). Verified on 2026-07-22.
+> **121 characters** (limit 132). Verified on 2026-08-02.
 
 ### Description
 
@@ -128,9 +134,9 @@ No AI is ever called to "estimate" anything. Same text, same model, same result 
 
 ACCURACY: WHAT IS EXACT AND WHAT IS AN ESTIMATE
 Here is the honest part. The extension embeds the o200k_base tokenizer:
-• OpenAI models (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, o3): EXACT count.
-• Anthropic (Claude), Google (Gemini), xAI (Grok) and DeepSeek: calibrated ESTIMATE — the o200k_base count is adjusted by a per-family factor, because those providers use their own tokenizers. The number is close, not exact, and the UI always flags it with "~".
-Prices come from a local table of 26 models, checked against each provider's official pricing page; the date of the last check lives in the code itself. Prices change — treat the figure as a very good reference, not as your invoice.
+• OpenAI models (GPT-4o, GPT-4.1, GPT-5, GPT-5.4, GPT-5.5, GPT-5.6, o3): EXACT count.
+• Anthropic (Claude), Google (Gemini), Perplexity (Sonar), xAI (Grok) and DeepSeek: calibrated ESTIMATE — the o200k_base count is adjusted by a per-family factor, because those providers use their own tokenizers. The number is close, not exact, and the UI always flags it with "~".
+Prices come from a local table covering the current models of OpenAI, Anthropic, Google, Perplexity, xAI and DeepSeek, checked against each provider's official pricing page; the date of the last check lives in the code itself. Prices change — treat the figure as a very good reference, not as your invoice.
 
 PERMISSION
 Exactly one: "storage", to keep your preferences (currency, BRL rate, per-site model choice, daily total) inside your own browser. Nothing is ever sent anywhere.
@@ -151,6 +157,24 @@ FREE, NO SIGN-UP, NO QUOTA. Open source: github.com/caioross/PromptMeter
 | **Website / Homepage URL** | https://promptmeter-pi.vercel.app |
 | **Support URL** | https://github.com/caioross/PromptMeter/issues |
 | **Privacy policy URL** | https://github.com/caioross/PromptMeter/blob/main/docs/store/PRIVACY.md |
+
+### Finalidade única (*Single purpose description*)
+
+> Campo *Privacy → Single purpose description* (**obrigatório**; sem ele o envio não é aceito).
+> Fonte oficial do formulário: <https://developer.chrome.com/docs/webstore/cws-dashboard-privacy>.
+> Uma finalidade só, verificável no próprio produto — nada de lista de funcionalidades.
+
+**PT**
+
+```
+Finalidade única: medir, localmente, quanto custa em dinheiro cada mensagem trocada com um assistente de IA. Nos quatro sites suportados (ChatGPT, Claude, Gemini e Perplexity), a extensão conta os tokens do texto que o usuário digita no campo de prompt e da resposta exibida na página, multiplica pelos preços do modelo cobrado (tabela local, USD por 1 milhão de tokens) e mostra o resultado em USD e R$ num card sobre o campo de prompt. A contagem é exata para os modelos OpenAI (tokenizer o200k_base embarcado) e uma estimativa calibrada para as demais famílias — a interface sempre marca a estimativa. A extensão não tem nenhuma outra função: não faz requisições de rede, não usa IA e nada sai do navegador; a única permissão (storage) guarda apenas as preferências que esse cálculo exige.
+```
+
+**EN**
+
+```
+Single purpose: to measure, locally, how much money each message exchanged with an AI assistant costs. On the four supported sites (ChatGPT, Claude, Gemini and Perplexity), the extension counts the tokens of the text typed in the prompt box and of the answer shown on the page, multiplies them by the billed model's prices (local table, USD per 1 million tokens) and shows the result in USD and BRL on a card above the prompt box. The count is exact for OpenAI models (bundled o200k_base tokenizer) and a calibrated estimate for the other families — the UI always flags the estimate. The extension does nothing else: it makes no network requests, uses no AI and nothing leaves the browser; its single permission (storage) only keeps the preferences this calculation needs.
+```
 
 ### Justificativa da permissão `storage`
 
@@ -190,7 +214,8 @@ Base: [`docs/store/PRIVACY.md`](PRIVACY.md).
 
 - [ ] Nome idêntico a `manifest.json → name` (`PromptMeter — Medidor de Custo`).
 - [ ] Descrição curta ≤132 caracteres — recontar após qualquer edição.
-- [ ] Número de modelos (26) e famílias conferem com `pricing.js`.
+- [ ] **Finalidade única** (*Single purpose description*) preenchida — o texto está neste arquivo.
+- [ ] Provedores citados conferem com `pricing.js` (`grep -o 'provider: "[^"]*"' PromptMeter_MVP_Sprint1/pricing.js | sort -u`) e o texto publicado **não** crava número de modelos.
 - [ ] Sites listados = os 4 do `manifest.json → content_scripts.matches`.
 - [ ] A distinção exato (OpenAI) × estimativa (demais) está explícita nas duas línguas.
 - [ ] **Screenshots capturados conforme [`screenshots.md`](screenshots.md)** — ao menos 1 (idealmente 5)
