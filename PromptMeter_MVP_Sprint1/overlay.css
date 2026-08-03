@@ -108,11 +108,17 @@
   .pm-card { background: rgba(24,28,36,.92); border-color: rgba(255,255,255,.10); color: #e8edf4; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
   .pm-model { background: #232a36; color: #e8edf4; border-color: rgba(255,255,255,.08); }
   .pm-model:hover { background: #2b3340; }
-  .pm-src, .pm-src-detected, .pm-src-user { background: #232a36; }
+  .pm-src, .pm-src-detected, .pm-src-user { background: #232a36; color: #94a3b8; }
+  /* chips de origem: mesma semântica de matiz do modo claro (ciano = detectado, violeta = você), só clareada */
+  .pm-src-detected { color: #67e8f9; }
+  .pm-src-user { color: #c4b5fd; }
   .pm-cost-val, .pm-metric b, .pm-foot b { color: #f1f5f9; }
+  /* textos secundários: as cores calibradas para fundo branco não valem sobre o card escuro (WCAG AA) */
+  .pm-caret, .pm-metric-label, .pm-brl, .pm-foot { color: #94a3b8; }
   .pm-sep, .pm-foot { border-color: rgba(255,255,255,.08); }
   .pm-x:hover { background: #2b3340; color: #fff; }
   .pm-menu { background: #181c24; border-color: rgba(255,255,255,.10); }
+  .pm-menu-title { color: #cbd5e1; }
   .pm-mitem { color: #e8edf4; }
   .pm-mitem:hover { background: #232a36; }
   .pm-mitem.pm-sel { background: #0f2e22; }
