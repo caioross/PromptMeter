@@ -1,9 +1,10 @@
 // PromptMeter — pricing.js
 // Tabela determinística de preços por modelo + cálculo de custo. Sem IA: tudo é conta.
-// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-29
-// (só os três Gemini Flash: 3.6, 3.5 e 3.5-Lite; Anthropic em 2026-07-28; o resto da
-// tabela — incluindo os demais Gemini — em 2026-07-20), a partir das páginas oficiais
-// de preços (OpenAI, Anthropic, Google, Perplexity).
+// Preços em USD por 1.000.000 de tokens (input/output). Última conferência 2026-07-30
+// (OpenAI inteira, em developers.openai.com/api/docs/pricing: 6 modelos novos entraram,
+// Terra e Luna estavam desatualizados e foram corrigidos, os outros 13 conferem; os três
+// Gemini Flash em 2026-07-29; Anthropic em 2026-07-28; o resto da tabela em 2026-07-20),
+// a partir das páginas oficiais de preços (OpenAI, Anthropic, Google, Perplexity).
 //
 // family controla a contagem de tokens:
 //   "openai"  -> contagem EXATA (tokenizer o200k_base embarcado)
@@ -13,7 +14,7 @@
 (() => {
   "use strict";
 
-  const PRICING_UPDATED = "2026-07-29";
+  const PRICING_UPDATED = "2026-07-30";
 
   // tokFactor: multiplica a contagem o200k para aproximar a tokenização da família.
   const FAMILY = {
@@ -34,20 +35,34 @@
     // Família GPT-5.6 (GA 2026-07-09) — flagship atual. Sol declarado primeiro: é o
     // fallback da família quando o seletor exibe só "GPT-5.6" (ver models.js §fallback).
     { id: "gpt-5.6-sol",    label: "GPT-5.6 Sol",    provider: "OpenAI", family: "openai", in: 5.00,  out: 30.00 },
-    { id: "gpt-5.6-terra",  label: "GPT-5.6 Terra",  provider: "OpenAI", family: "openai", in: 2.50,  out: 15.00 },
-    { id: "gpt-5.6-luna",   label: "GPT-5.6 Luna",   provider: "OpenAI", family: "openai", in: 1.00,  out: 6.00 },
+    // Terra e Luna baixaram de preço na conferência de 2026-07-30 (antes $2.50/$15 e
+    // $1.00/$6 na tabela): o overlay cobrava 5x o real no Luna. Fonte: a mesma página
+    // oficial da issue #51 — corrigido aqui porque a data acima cobre a OpenAI inteira.
+    { id: "gpt-5.6-terra",  label: "GPT-5.6 Terra",  provider: "OpenAI", family: "openai", in: 2.00,  out: 12.00 },
+    { id: "gpt-5.6-luna",   label: "GPT-5.6 Luna",   provider: "OpenAI", family: "openai", in: 0.20,  out: 1.20 },
+    // Tier Pro (issue #51): o rótulo LONGO é o que corrige o casamento. Sem a linha
+    // "GPT-5 Pro", o passo 1 de matchModelFromText casava por prefixo em "GPT-5" — o
+    // guard `after` (models.js:26) só barra dígito/ponto, não a palavra de tier — e o
+    // overlay mostrava 8% do custo real. Declarados antes do modelo base da mesma
+    // versão, seguindo a convenção da tabela (mais capaz primeiro).
+    { id: "gpt-5.5-pro",    label: "GPT-5.5 Pro",    provider: "OpenAI", family: "openai", in: 30.00, out: 180.00 },
     { id: "gpt-5.5",        label: "GPT-5.5",        provider: "OpenAI", family: "openai", in: 5.00,  out: 30.00 },
+    { id: "gpt-5.4-pro",    label: "GPT-5.4 Pro",    provider: "OpenAI", family: "openai", in: 30.00, out: 180.00 },
     { id: "gpt-5.4",        label: "GPT-5.4",        provider: "OpenAI", family: "openai", in: 2.50,  out: 15.00 },
     { id: "gpt-5.4-mini",   label: "GPT-5.4 mini",   provider: "OpenAI", family: "openai", in: 0.75,  out: 4.50 },
     { id: "gpt-5.4-nano",   label: "GPT-5.4 nano",   provider: "OpenAI", family: "openai", in: 0.20,  out: 1.25 },
+    { id: "gpt-5.2",        label: "GPT-5.2",        provider: "OpenAI", family: "openai", in: 1.75,  out: 14.00 },
+    { id: "gpt-5-pro",      label: "GPT-5 Pro",      provider: "OpenAI", family: "openai", in: 15.00, out: 120.00 },
     { id: "gpt-5",          label: "GPT-5",          provider: "OpenAI", family: "openai", in: 1.25,  out: 10.00 },
     { id: "gpt-5-mini",     label: "GPT-5 mini",     provider: "OpenAI", family: "openai", in: 0.25,  out: 2.00 },
     { id: "gpt-5-nano",     label: "GPT-5 nano",     provider: "OpenAI", family: "openai", in: 0.05,  out: 0.40 },
     { id: "gpt-4.1",        label: "GPT-4.1",        provider: "OpenAI", family: "openai", in: 2.00,  out: 8.00 },
     { id: "gpt-4.1-mini",   label: "GPT-4.1 mini",   provider: "OpenAI", family: "openai", in: 0.40,  out: 1.60 },
+    { id: "gpt-4.1-nano",   label: "GPT-4.1 nano",   provider: "OpenAI", family: "openai", in: 0.10,  out: 0.40 },
     { id: "gpt-4o",         label: "GPT-4o",         provider: "OpenAI", family: "openai", in: 2.50,  out: 10.00 },
     { id: "gpt-4o-mini",    label: "GPT-4o mini",    provider: "OpenAI", family: "openai", in: 0.15,  out: 0.60 },
     { id: "o3",             label: "o3",             provider: "OpenAI", family: "openai", in: 2.00,  out: 8.00 },
+    { id: "o3-mini",        label: "o3-mini",        provider: "OpenAI", family: "openai", in: 1.10,  out: 4.40 },
 
     // ---------- Anthropic (Claude) ----------
     // Família Claude 5 (linha atual em claude.ai). Fable 5 é o topo do catálogo.

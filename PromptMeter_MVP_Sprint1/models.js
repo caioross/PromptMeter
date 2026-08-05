@@ -32,11 +32,28 @@
     //    resolve para o flagship da família (gpt-5.6-sol), não para uma variante barata.
     //    O conjunto de tiers do texto deve ser IGUAL ao do rótulo: "2.5 flash lite"
     //    não casa em "Gemini 2.5 Flash" ({flash} vs {flash,lite}) nem o inverso.
+    //    A versão precisa aparecer como TOKEN INTEIRO do texto, não como pedaço de outro
+    //    número: com `includes`, o "5" de "GPT-5 Pro" casava dentro do "1.5" de
+    //    "Gemini 1.5 Pro" e, no Perplexity (provider aberto), um Gemini era precificado
+    //    como gpt-5-pro — $15/$120 em vez de $1/$1, com source "detected" (issue #51).
     const tiersOf = (s) => (s.match(/\b(opus|sonnet|haiku|fable|pro|flash|mini|nano|lite)\b/g) || []).sort().join(" ");
     const nTiers = tiersOf(n);
+    const nTokens = n.split(" ");
     for (const m of inProvider) {
       const ver = (m.label.match(/[0-9]+(\.[0-9]+)?/g) || []).join(" ");
-      if (ver && n.includes(norm(ver)) && tiersOf(norm(m.label)) === nTiers) return m.id;
+      if (!ver) continue;
+      if (!norm(ver).split(" ").every((v) => nTokens.includes(v))) continue;
+      if (tiersOf(norm(m.label)) !== nTiers) continue;
+      // Com provider ABERTO (Perplexity), versão + tier não bastam: o texto precisa
+      // trazer a MARCA do rótulo ("gpt", "claude", "gemini", "sonar"…), senão
+      // "Mistral Large 5 Pro" — modelo que não está na tabela — casaria gpt-5-pro.
+      // Com provider conhecido o filtro de provedor já impede isso, e a versão nua
+      // continua valendo ("5.4 mini" no ChatGPT → gpt-5.4-mini).
+      if (!provider) {
+        const brand = norm(m.label).split(" ").filter((t) => !/^[0-9]/.test(t) && !tiersOf(t));
+        if (brand.length && !brand.some((b) => nTokens.includes(b))) continue;
+      }
+      return m.id;
     }
     return null;
   }
