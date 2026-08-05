@@ -292,8 +292,26 @@
     else closeMenu();
   }
 
+  // targetIsGone: o campo saiu do DOM? Pura e injetável para poder ser testada em Node.
+  // Sem `doc` utilizável a resposta é NÃO — na dúvida o card fica, nunca some por engano.
+  function targetIsGone(target, doc) {
+    if (!target || !doc || typeof doc.contains !== "function") return false;
+    return !doc.contains(target);
+  }
+  // As SPAs dos 4 sites remontam o composer ao trocar de conversa: o campo é removido do DOM
+  // sem nenhum evento. Sem isto o card ficava congelado exibindo tokens/custo de um rascunho
+  // que não existe mais. Esconder é "de sistema" (hideOverlay) — NUNCA dismissOverlay: `userHidden`
+  // continua intacto e focar um campo novo reabre o card normalmente (issue #12).
+  function dropDeadTarget() {
+    if (!targetIsGone(activeTarget, typeof document !== "undefined" ? document : null)) return false;
+    activeTarget = null;
+    hideOverlay();
+    return true;
+  }
+
   function position() {
-    if (!wrap || !activeTarget || !document.contains(activeTarget)) return;
+    if (!wrap) return;
+    if (!activeTarget || dropDeadTarget()) return;
     let r; try { r = activeTarget.getBoundingClientRect(); } catch { return; }
     if (!r || (r.width === 0 && r.height === 0)) { hideOverlay(); return; }
     const vw = window.innerWidth, vh = window.innerHeight, margin = 8;
@@ -469,6 +487,10 @@
     if (respObserver) return;
     let t = null;
     respObserver = new MutationObserver(() => {
+      // Gatilho determinístico do card fantasma: `position()` só roda em scroll/resize, e quem
+      // troca de conversa e apenas lê a tela não dispara nenhum dos dois. Este observer já existe
+      // e já roda a cada mutação — a checagem é uma comparação de nó, fora do caminho da digitação.
+      dropDeadTarget();
       clearTimeout(t);
       t = setTimeout(scanResponses, STREAM_IDLE_MS);
     });
@@ -535,6 +557,6 @@
 
   // Export só em Node (CommonJS) para o teste da função pura; no browser `module` é undefined.
   if (typeof module !== "undefined" && module.exports) {
-    module.exports = { rollSessionIntoHistory, sessionFooterState };
+    module.exports = { rollSessionIntoHistory, sessionFooterState, targetIsGone };
   }
 })();
