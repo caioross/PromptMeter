@@ -2,6 +2,7 @@
 <html lang="pt-br">
 <head>
   <meta charset="utf-8" />
+  <!-- Textos em pt-BR são o fallback: options.js os substitui pelo locale ativo (_locales). -->
   <title>PromptMeter — Opções</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="icon" href="icons/icon32.png" />
@@ -40,26 +41,26 @@
 <body>
   <div class="wrap">
     <h1>PromptMeter <span class="pill" id="version">v?</span></h1>
-    <p class="sub">Conte tokens e veja o custo de cada prompt em tempo real. 100% local — nenhum dado sai do seu navegador.</p>
+    <p class="sub" data-i18n="opt_subtitle">Conte tokens e veja o custo de cada prompt em tempo real. 100% local — nenhum dado sai do seu navegador.</p>
 
     <div class="card">
       <div class="row">
         <div>
-          <div class="label">Moeda</div>
-          <div class="desc">Mostrar custo em dólar, ou dólar + real (aproximado).</div>
+          <div class="label" data-i18n="opt_currency">Moeda</div>
+          <div class="desc" data-i18n="opt_currency_desc">Mostrar custo em dólar, ou dólar + real (aproximado).</div>
         </div>
         <div class="ctrl">
           <select id="currency">
-            <option value="both">USD + R$ (aprox.)</option>
-            <option value="usd">Apenas USD</option>
+            <option value="both" data-i18n="opt_currency_both">USD + R$ (aprox.)</option>
+            <option value="usd" data-i18n="opt_currency_usd">Apenas USD</option>
           </select>
         </div>
       </div>
 
       <div class="row">
         <div>
-          <div class="label">Cotação do dólar (R$)</div>
-          <div class="desc">Usada para a conversão aproximada. Ajuste quando quiser.</div>
+          <div class="label" data-i18n="opt_rate">Cotação do dólar (R$)</div>
+          <div class="desc" data-i18n="opt_rate_desc">Usada para a conversão aproximada. Ajuste quando quiser.</div>
         </div>
         <div class="ctrl">
           <input id="brlRate" type="number" min="0" step="0.01" />
@@ -68,8 +69,8 @@
 
       <div class="row">
         <div>
-          <div class="label">Custo da resposta + total da sessão</div>
-          <div class="desc">Estima também os tokens da resposta do modelo e soma o gasto do dia.</div>
+          <div class="label" data-i18n="opt_track">Custo da resposta + total da sessão</div>
+          <div class="desc" data-i18n="opt_track_desc">Estima também os tokens da resposta do modelo e soma o gasto do dia.</div>
         </div>
         <div class="ctrl">
           <label class="switch"><input id="trackResponses" type="checkbox" /><span class="slider"></span></label>
@@ -80,38 +81,40 @@
     <div class="card">
       <div class="row">
         <div>
-          <div class="label">Zerar total da sessão</div>
-          <div class="desc">Reinicia o contador de gasto acumulado <strong>apenas de hoje</strong>. Não afeta o histórico dos dias anteriores.</div>
+          <div class="label" data-i18n="opt_reset_session">Zerar total da sessão</div>
+          <div class="desc" data-i18n-html="opt_reset_session_desc">Reinicia o contador de gasto acumulado <strong>apenas de hoje</strong>. Não afeta o histórico dos dias anteriores.</div>
         </div>
-        <div class="ctrl"><button id="resetSession" type="button">Zerar sessão</button></div>
+        <div class="ctrl"><button id="resetSession" type="button" data-i18n="opt_reset_session_btn">Zerar sessão</button></div>
       </div>
       <div class="row">
         <div>
-          <div class="label">Apagar histórico de gastos</div>
-          <div class="desc">Remove todo o histórico diário guardado no seu navegador (até 90 dias). Ação sem volta e distinta de <em>Zerar sessão</em>.</div>
+          <div class="label" data-i18n="opt_clear_history">Apagar histórico de gastos</div>
+          <div class="desc" data-i18n-html="opt_clear_history_desc">Remove todo o histórico diário guardado no seu navegador (até 90 dias). Ação sem volta e distinta de <em>Zerar sessão</em>.</div>
         </div>
-        <div class="ctrl"><button id="clearHistory" type="button">Apagar histórico</button></div>
+        <div class="ctrl"><button id="clearHistory" type="button" data-i18n="opt_clear_history_btn">Apagar histórico</button></div>
       </div>
       <div class="row">
         <div>
-          <div class="label">Limpar preferências de modelo</div>
-          <div class="desc">Esquece os modelos que você fixou manualmente por site.</div>
+          <div class="label" data-i18n="opt_clear_overrides">Limpar preferências de modelo</div>
+          <div class="desc" data-i18n="opt_clear_overrides_desc">Esquece os modelos que você fixou manualmente por site.</div>
         </div>
-        <div class="ctrl"><button id="clearOverrides" type="button">Limpar</button></div>
+        <div class="ctrl"><button id="clearOverrides" type="button" data-i18n="opt_clear_overrides_btn">Limpar</button></div>
       </div>
     </div>
 
     <div class="foot">
-      <button id="save" class="primary" type="button">Salvar</button>
+      <button id="save" class="primary" type="button" data-i18n="opt_save">Salvar</button>
       <span id="status" class="muted"></span>
     </div>
 
-    <p class="muted" style="margin-top:22px">
+    <!-- A data de preços entra na mensagem pelo placeholder $DATE$; sem chrome.i18n, o
+         parágrafo abaixo permanece e só o #priceDate é preenchido (options.js). -->
+    <p class="muted" style="margin-top:22px" data-i18n-html="opt_how_it_works">
       <strong>Como funciona:</strong> a contagem de tokens dos modelos OpenAI é exata (tokenizer o200k embarcado);
       para Claude, Gemini e outros a contagem é uma estimativa calibrada (marcada com <b>~</b>). Preços por 1M de tokens,
       atualizados em <span id="priceDate">—</span>. Você pode trocar o modelo cobrado direto no card que aparece no site.
     </p>
-    <p class="muted">
+    <p class="muted" data-i18n-html="opt_privacy">
       <strong>Privacidade:</strong> tudo roda offline no seu navegador. Nenhum texto, token ou custo é enviado para qualquer servidor.
     </p>
   </div>
