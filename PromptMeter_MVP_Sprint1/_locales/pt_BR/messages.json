@@ -15,5 +15,37 @@
   "approx": { "message": "estimativa" },
   "src_user": { "message": "você" },
   "src_detected": { "message": "detectado" },
-  "src_default": { "message": "padrão" }
+  "src_default": { "message": "padrão" },
+
+  "opt_html_lang": { "message": "pt-br" },
+  "opt_title": { "message": "PromptMeter — Opções" },
+  "opt_subtitle": { "message": "Conte tokens e veja o custo de cada prompt em tempo real. 100% local — nenhum dado sai do seu navegador." },
+  "opt_currency": { "message": "Moeda" },
+  "opt_currency_desc": { "message": "Mostrar custo em dólar, ou dólar + real (aproximado)." },
+  "opt_currency_both": { "message": "USD + R$ (aprox.)" },
+  "opt_currency_usd": { "message": "Apenas USD" },
+  "opt_rate": { "message": "Cotação do dólar (R$)" },
+  "opt_rate_desc": { "message": "Usada para a conversão aproximada. Ajuste quando quiser." },
+  "opt_track": { "message": "Custo da resposta + total da sessão" },
+  "opt_track_desc": { "message": "Estima também os tokens da resposta do modelo e soma o gasto do dia." },
+  "opt_reset_session": { "message": "Zerar total da sessão" },
+  "opt_reset_session_desc": { "message": "Reinicia o contador de gasto acumulado <strong>apenas de hoje</strong>. Não afeta o histórico dos dias anteriores." },
+  "opt_reset_session_btn": { "message": "Zerar sessão" },
+  "opt_clear_history": { "message": "Apagar histórico de gastos" },
+  "opt_clear_history_desc": { "message": "Remove todo o histórico diário guardado no seu navegador (até 90 dias). Ação sem volta e distinta de <em>Zerar sessão</em>." },
+  "opt_clear_history_btn": { "message": "Apagar histórico" },
+  "opt_clear_overrides": { "message": "Limpar preferências de modelo" },
+  "opt_clear_overrides_desc": { "message": "Esquece os modelos que você fixou manualmente por site." },
+  "opt_clear_overrides_btn": { "message": "Limpar" },
+  "opt_save": { "message": "Salvar" },
+  "opt_how_it_works": {
+    "message": "<strong>Como funciona:</strong> a contagem de tokens dos modelos OpenAI é exata (tokenizer o200k embarcado); para Claude, Gemini e outros a contagem é uma estimativa calibrada (marcada com <b>~</b>). Preços por 1M de tokens, atualizados em $DATE$. Você pode trocar o modelo cobrado direto no card que aparece no site.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-07-20" } }
+  },
+  "opt_privacy": { "message": "<strong>Privacidade:</strong> tudo roda offline no seu navegador. Nenhum texto, token ou custo é enviado para qualquer servidor." },
+  "opt_saved": { "message": "Salvo ✓" },
+  "opt_session_reset": { "message": "Sessão zerada ✓" },
+  "opt_history_cleared": { "message": "Histórico apagado ✓" },
+  "opt_overrides_cleared": { "message": "Preferências de modelo limpas ✓" },
+  "opt_confirm_clear_history": { "message": "Apagar todo o histórico de gastos guardado neste navegador? Esta ação não pode ser desfeita." }
 }

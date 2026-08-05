@@ -15,5 +15,37 @@
   "approx": { "message": "estimate" },
   "src_user": { "message": "you" },
   "src_detected": { "message": "detected" },
-  "src_default": { "message": "default" }
+  "src_default": { "message": "default" },
+
+  "opt_html_lang": { "message": "en" },
+  "opt_title": { "message": "PromptMeter — Options" },
+  "opt_subtitle": { "message": "Count tokens and see the cost of every prompt in real time. 100% local — no data leaves your browser." },
+  "opt_currency": { "message": "Currency" },
+  "opt_currency_desc": { "message": "Show cost in US dollars, or dollars + Brazilian reais (approximate)." },
+  "opt_currency_both": { "message": "USD + BRL (approx.)" },
+  "opt_currency_usd": { "message": "USD only" },
+  "opt_rate": { "message": "US dollar rate (BRL)" },
+  "opt_rate_desc": { "message": "Used for the approximate conversion. Adjust it whenever you want." },
+  "opt_track": { "message": "Response cost + session total" },
+  "opt_track_desc": { "message": "Also estimates the model's response tokens and adds up today's spending." },
+  "opt_reset_session": { "message": "Reset session total" },
+  "opt_reset_session_desc": { "message": "Restarts the accumulated spending counter <strong>for today only</strong>. Previous days' history is not affected." },
+  "opt_reset_session_btn": { "message": "Reset session" },
+  "opt_clear_history": { "message": "Delete spending history" },
+  "opt_clear_history_desc": { "message": "Removes all daily history stored in your browser (up to 90 days). This cannot be undone and is different from <em>Reset session</em>." },
+  "opt_clear_history_btn": { "message": "Delete history" },
+  "opt_clear_overrides": { "message": "Clear model preferences" },
+  "opt_clear_overrides_desc": { "message": "Forgets the models you pinned manually for each site." },
+  "opt_clear_overrides_btn": { "message": "Clear" },
+  "opt_save": { "message": "Save" },
+  "opt_how_it_works": {
+    "message": "<strong>How it works:</strong> token counting for OpenAI models is exact (o200k tokenizer embedded); for Claude, Gemini and others the count is a calibrated estimate (marked with <b>~</b>). Prices per 1M tokens, updated on $DATE$. You can switch the billed model right in the card shown on the site.",
+    "placeholders": { "date": { "content": "$1", "example": "2026-07-20" } }
+  },
+  "opt_privacy": { "message": "<strong>Privacy:</strong> everything runs offline in your browser. No text, token or cost is ever sent to any server." },
+  "opt_saved": { "message": "Saved ✓" },
+  "opt_session_reset": { "message": "Session reset ✓" },
+  "opt_history_cleared": { "message": "History deleted ✓" },
+  "opt_overrides_cleared": { "message": "Model preferences cleared ✓" },
+  "opt_confirm_clear_history": { "message": "Delete all spending history stored in this browser? This action cannot be undone." }
 }
